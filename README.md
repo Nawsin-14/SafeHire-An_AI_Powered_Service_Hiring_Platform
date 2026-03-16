@@ -21,12 +21,12 @@ Traditional service hiring often suffers from:
 
 SafeHire addresses these problems by providing:
 
-✔ Worker registration with identity details
-✔ Risk score estimation (AI placeholder)
-✔ Worker verification system
-✔ Job posting platform
-✔ Secure hiring workflow
-✔ Transparent transaction history
+<li> Worker registration with identity details<li>
+<li> Risk score estimation (AI placeholder)<li>
+<li> Worker verification system<li>
+<li> Job posting platform<li>
+<li> Secure hiring workflow<li>
+<li> Transparent transaction history<li>
 
 ##  Current Features (Implemented So Far)
 
@@ -92,6 +92,6 @@ python -m pip install -r requirements.txt
 
 ---
 ## Contributing Members
-- 1.Nazia Faruque Diya
-- 2.Afridur Rahman Khan Mim
-- 3.Md.Zarif Hossain Alvi  
+ 1.Nazia Faruque Diya
+ 2.Afridur Rahman Khan Mim
+ 3.Md.Zarif Hossain Alvi  
