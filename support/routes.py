@@ -1,6 +1,7 @@
 from flask import jsonify, render_template, request
 from support.app import app
 from support.models import db, Worker, Job, HireTransaction
+from support.services.matching import calculate_match_score
 
 
 @app.route("/")
@@ -100,41 +101,42 @@ def get_jobs():
 
 @app.route("/job_matches", methods=["GET"])
 def get_job_matches():
-    jobs = Job.query.all()
-    workers = Worker.query.all()
+    try:
+        jobs = Job.query.all()
+        workers = Worker.query.all()
 
-    result = []
+        result = []
 
-    for job in jobs:
-        best_worker = None
-        best_score = -999999
+        for job in jobs:
+            best_worker = None
+            best_score = -1
 
-        for worker in workers:
-            score = 0
+            for worker in workers:
+                if (worker.verification_status or "").strip().lower() != "verified":
+                    continue
 
-            if worker.verification_status != "Verified":
-                continue
+                score = calculate_match_score(worker, job)
 
-            if job.category.lower() in worker.skills.lower():
-                score += 50
+                if score > best_score:
+                    best_score = score
+                    best_worker = worker
 
-            score += 30  # verified bonus
-            score -= worker.risk_score
+            result.append({
+                "job_id": job.id,
+                "job_title": job.title,
+                "job_category": job.category,
+                "job_location": job.location,
+                "matched_worker": best_worker.name if best_worker else "No suitable worker found",
+                "worker_id": best_worker.id if best_worker else None,
+                "score": best_score if best_worker else None
+           })
 
-            if score > best_score:
-                best_score = score
-                best_worker = worker
-
-        result.append({
-            "job_id": job.id,
-            "job_title": job.title,
-            "matched_worker": best_worker.name if best_worker else "No suitable worker found",
-            "worker_id": best_worker.id if best_worker else None,
-            "score": best_score if best_worker else None
-        })
-
-    return jsonify(result)
-
+        return jsonify(result)
+    except Exception as e:
+       return jsonify({
+            "error": str(e),
+            "type": type(e).__name__
+        }), 500
 
 @app.route("/add_job", methods=["POST"])
 def add_job():

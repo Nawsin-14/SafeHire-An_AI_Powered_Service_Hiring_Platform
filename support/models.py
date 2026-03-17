@@ -10,7 +10,7 @@ class Worker(db.Model):
     address = db.Column(db.String(200), nullable=False)
     skills = db.Column(db.String(200), nullable=False)
     risk_score = db.Column(db.Float, default=0)
-    verification_status = db.Column(db.String(20),default="pending")
+    verification_status = db.Column(db.String(20),default="Pending")
 
     
     

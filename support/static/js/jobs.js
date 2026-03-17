@@ -33,6 +33,7 @@ function renderJobs(jobs, matchMap = {}) {
 
   jobs.forEach((job) => {
     const match = matchMap[job.id];
+    const hasMatch = match && match.worker_id;
 
     jobList.innerHTML += `
       <div class="bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur transition hover:bg-white/10 hover:shadow-xl">
@@ -48,16 +49,28 @@ function renderJobs(jobs, matchMap = {}) {
         </div>
 
         <p class="text-sm text-gray-300 mt-4">${job.description || "No description provided."}</p>
+        <div class="mt-4 p-4 rounded-2xl bg-purple-500/10 border border-purple-400/20">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-xs font-semibold text-purple-200 uppercase tracking-wide">AI Match Recommendation</p>
+            ${
+              hasMatch
+                ? `<span class="px-2 py-1 rounded-full text-[10px] font-semibold bg-purple-500/20 text-purple-200 border border-purple-400/20">Best Match</span>`
+                : ""
+            }
+          </div>
 
-        <div class="mt-4 p-3 rounded-2xl bg-pink-500/10 border border-pink-400/20">
-          <p class="text-xs font-semibold text-pink-200 uppercase tracking-wide">Suggested Worker</p>
-          <p class="text-sm text-white mt-1">
-            ${match ? match.matched_worker : "No suggestion available"}
+
+          <p class="text-sm text-white mt-2">
+            ${hasMatch ? match.matched_worker : "No suitable worker found"}
           </p>
+
           ${
-            match && match.worker_id
-              ? `<p class="text-xs text-gray-300 mt-1">Worker ID: ${match.worker_id} • Match Score: ${match.score}</p>`
-              : ""
+            hasMatch
+              ? `
+                <p class="text-xs text-gray-300 mt-1">Worker ID: ${match.worker_id}</p>
+                <p class="text-xs text-gray-300 mt-1">Match Score: ${match.score}/100</p>
+              `
+              : `<p class="text-xs text-gray-400 mt-1">No verified worker matched this job yet.</p>`
           }
         </div>
 
