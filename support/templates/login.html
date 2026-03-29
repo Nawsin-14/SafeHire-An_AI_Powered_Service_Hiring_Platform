@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login - SafeHire</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8] text-white">
+
+  <div class="bg-white/10 backdrop-blur p-8 rounded-3xl w-80 shadow-xl">
+    <h2 class="text-2xl font-bold text-center mb-6">SafeHire Login</h2>
+
+    <form id="loginForm" class="space-y-4">
+      <input name="username" placeholder="Username"
+        class="w-full p-3 rounded-xl bg-white/10 border border-white/20" required>
+
+      <input name="password" type="password" placeholder="Password"
+        class="w-full p-3 rounded-xl bg-white/10 border border-white/20" required>
+
+      <button class="w-full py-3 bg-pink-500 rounded-xl font-semibold hover:opacity-90">
+        Login
+      </button>
+    </form>
+
+    <p id="error" class="text-red-400 text-sm mt-3 text-center"></p>
+  </div>
+
+<script>
+document.getElementById("loginForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const formData = new FormData(this);
+  const data = Object.fromEntries(formData.entries());
+
+  const res = await fetch("/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    document.getElementById("error").innerText = result.error;
+    return;
+  }
+
+  if (result.role === "admin") {
+    window.location.href = "/verify-workers";
+  } else {
+    window.location.href = "/jobs";
+  }
+});
+</script>
+
+</body>
+</html>
