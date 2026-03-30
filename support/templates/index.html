@@ -37,7 +37,7 @@
 
 <body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
   <header class="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3">
       <div class="flex items-center gap-3">
         <img 
           src="/static/images/SafeHire_logo.png"
@@ -57,11 +57,16 @@
         <a class="hover:text-white transition" href="/verify-workers">Verify</a>
         <a class="hover:text-white transition" href="/jobs">Jobs</a>
         <a class="hover:text-white transition" href="/transactions">Transactions</a>
+        
       </nav>
-
-      <a href="/jobs" class="hidden md:inline-flex px-5 py-3 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:opacity-90 transition shadow-glow">
-        Get Started
-      </a>
+      <div class="flex items-center gap-3 ml-auto">
+        <a href="/login" class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90">
+         Login
+        </a>
+        <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
+         Logout
+       </a>
+     </div>
     </div>
   </header>
 

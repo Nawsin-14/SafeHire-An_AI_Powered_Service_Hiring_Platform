@@ -7,6 +7,7 @@ app = Flask(
     template_folder="templates",
     static_folder="static"
 )
+app.secret_key = "safeshire_secret_key"
 
 CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///workers.db'

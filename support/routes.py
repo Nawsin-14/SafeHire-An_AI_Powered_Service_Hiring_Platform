@@ -1,4 +1,4 @@
-from flask import jsonify, render_template, request
+from flask import jsonify, render_template, session, redirect, request
 from support.app import app
 from support.models import db, Worker, Job, HireTransaction, User
 from support.services.matching import calculate_match_score
@@ -6,7 +6,7 @@ from support.services.matching import calculate_match_score
 
 @app.route("/")
 def home():
-    return render_template("login.html")
+    return render_template("index.html")
 
 
 @app.route("/worker-dashboard")
@@ -238,6 +238,8 @@ def login():
 
     username = data.get("username", "").strip()
     password = data.get("password", "").strip()
+    session["user"] = user.username
+    session["role"] = user.role
 
     user = User.query.filter_by(username=username).first()
 
@@ -245,6 +247,11 @@ def login():
         return jsonify({"error": "Invalid credentials"}), 401
 
     return jsonify({
-        "message": "Login successful",
+        "message": "Login successful!!!",
         "role": user.role
     })
+@app.route("/logout")
+def logout():
+    from flask import session, redirect
+    session.clear()
+    return redirect("/login")
