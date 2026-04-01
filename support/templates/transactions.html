@@ -46,14 +46,39 @@
         </div>
       </div>
 
-      <nav class="hidden md:flex items-center gap-6 text-sm text-gray-300">
-        <a class="hover:text-white" href="/">Home</a>
-        <a class="hover:text-white" href="/worker-dashboard">Workers</a>
-        <a class="hover:text-white" href="/add-worker">Add Worker</a>
-        <a class="hover:text-white" href="/verify-workers">Verify</a>
-        <a class="hover:text-white" href="/jobs">Jobs</a>
-        <a class="hover:text-white" href="/transactions">Transactions</a>
-      </nav>
+<nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full">
+  <a class="hover:text-white" href="/">Home</a>
+
+  {% if username %}
+    {% if role == "admin" %}
+      <a class="hover:text-white" href="/worker-dashboard">Workers</a>
+      <a class="hover:text-white" href="/verify-workers">Verify</a>
+      <a class="hover:text-white" href="/transactions">Transactions</a>
+    {% elif role == "user" %}
+      <a class="hover:text-white" href="/worker-dashboard">Workers</a>
+      <a class="hover:text-white" href="/add-worker">Add Worker</a>
+      <a class="hover:text-white" href="/jobs">Jobs</a>
+      <a class="hover:text-white" href="/transactions">Transactions</a>
+    {% endif %}
+
+    <div class="flex items-center gap-3 ml-auto">
+      <span class="text-gray-300 text-sm">Hi, {{ username }}</span>
+      <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
+        Logout
+      </a>
+    </div>
+
+  {% else %}
+    <div class="flex items-center gap-3 ml-auto">
+      <a href="/login" class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90">
+        Login
+      </a>
+      <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
+        Logout
+      </a>
+    </div>
+  {% endif %}
+</nav>
     </div>
   </header>
 

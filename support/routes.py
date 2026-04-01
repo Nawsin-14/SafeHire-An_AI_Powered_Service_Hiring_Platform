@@ -1,4 +1,4 @@
-from flask import jsonify, render_template, session, redirect, request
+from flask import jsonify, render_template, redirect, request, session
 from support.app import app
 from support.models import db, Worker, Job, HireTransaction, User
 from support.services.matching import calculate_match_score
@@ -6,32 +6,46 @@ from support.services.matching import calculate_match_score
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template(
+        "index.html",
+        username=session.get("username"),
+        role=session.get("role")
+    )
 
 
 @app.route("/worker-dashboard")
 def worker_dashboard():
-    return render_template("worker_dashboard.html")
+    return render_template("worker_dashboard.html",
+                           username=session.get("username"),
+                           role=session.get("role"))
 
 
 @app.route("/add-worker")
 def add_worker_page():
-    return render_template("worker_page.html")
+    return render_template("worker_page.html",
+                           username=session.get("username"),
+                           role=session.get("role"))
 
 
 @app.route("/verify-workers")
 def verify_workers_page():
-    return render_template("verify_workers.html")
+    return render_template("verify_workers.html",
+                           username=session.get("username"),
+                           role=session.get("role"))
 
 
 @app.route("/jobs")
 def jobs_page():
-    return render_template("jobs.html")
+    return render_template("jobs.html",
+                           username=session.get("username"),
+                           role=session.get("role"))
 
 
 @app.route("/transactions")
 def transactions_page():
-    return render_template("transactions.html")
+    return render_template("transactions.html",
+                           username=session.get("username"),
+                           role=session.get("role"))
 
 
 @app.route("/workers", methods=["GET"])
@@ -234,24 +248,26 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
 
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
 
     username = data.get("username", "").strip()
     password = data.get("password", "").strip()
-    session["user"] = user.username
-    session["role"] = user.role
 
     user = User.query.filter_by(username=username).first()
 
     if not user or user.password != password:
         return jsonify({"error": "Invalid credentials"}), 401
 
+    session["user_id"] = user.id
+    session["username"] = user.username
+    session["role"] = user.role
+
     return jsonify({
-        "message": "Login successful!!!",
+        "message": "Login successful",
         "role": user.role
-    })
+    }), 200
 @app.route("/logout")
+
 def logout():
-    from flask import session, redirect
     session.clear()
-    return redirect("/login")
+    return redirect("/")
