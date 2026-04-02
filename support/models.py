@@ -4,6 +4,7 @@ db = SQLAlchemy()
 
 class Worker(db.Model):
     id = db.Column(db.Integer, primary_key=True)  
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False, unique=True)
     name = db.Column(db.String(100), nullable=False)
     nid = db.Column(db.String(50), unique=True, nullable=False)
     phone = db.Column(db.String(20), nullable=False)
@@ -11,6 +12,8 @@ class Worker(db.Model):
     skills = db.Column(db.String(200), nullable=False)
     risk_score = db.Column(db.Float, default=0)
     verification_status = db.Column(db.String(20),default="Pending")
+    experience = db.Column(db.Integer, default=0)
+    rating = db.Column(db.Float, default=0.0)
 
     
     
@@ -28,15 +31,14 @@ class Worker(db.Model):
     
 class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
+    employer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     title = db.Column(db.String(120), nullable=False)
     category = db.Column(db.String(80), nullable=False)
     location = db.Column(db.String(120), nullable=False)
     budget = db.Column(db.Float, nullable=False, default=0.0)
-
     description = db.Column(db.Text, nullable=True)
-    
     status = db.Column(db.String(20), default="open") 
+    assigned_worker_id = db.Column(db.Integer, db.ForeignKey('worker.id'), nullable=True)
 
     def to_dict(self):
         return {
@@ -51,13 +53,12 @@ class Job(db.Model):
     
 class HireTransaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
-    employer_name = db.Column(db.String(120), nullable=False)
-
-    job_id = db.Column(db.Integer, nullable=False)
-    worker_id = db.Column(db.Integer, nullable=False)
-
+    employer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    worker_id = db.Column(db.Integer, db.ForeignKey('worker.id'), nullable=False)
+    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
     status = db.Column(db.String(20), default="assigned") 
+    amount = db.Column(db.Float, default=0.0)
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
 
     def to_dict(self):
         return {
@@ -70,7 +71,6 @@ class HireTransaction(db.Model):
     
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(20), nullable=False) 
@@ -81,3 +81,8 @@ class User(db.Model):
             "username": self.username,
             "role": self.role
         }
+class Review(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    worker_id = db.Column(db.Integer, nullable=False)
+    rating = db.Column(db.Float, nullable=False)
+    comment = db.Column(db.Text)
