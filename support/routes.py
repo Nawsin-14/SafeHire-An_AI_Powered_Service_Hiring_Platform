@@ -19,6 +19,7 @@ def home():
         username=session.get("username"),
         role=session.get("role")
     )
+
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "GET":
@@ -68,7 +69,7 @@ def login():
     return jsonify({
      "message": "Login successful!!!",
      "role": user.role,
-     "redirect": "/verify-workers" if user.role == "admin"
+     "redirect": "/admin-workers" if user.role == "admin"
         else "/worker-dashboard" if user.role == "worker"
         else "/jobs"
 }), 200
@@ -86,7 +87,7 @@ def dashboard():
         return redirect("/login")
 
     if session.get("role") == "admin":
-        return redirect("/verify-workers")
+        return redirect("/admin-workers")
     elif session.get("role") == "employer":
         return redirect("/jobs")
     elif session.get("role") == "worker":
@@ -133,8 +134,8 @@ def add_worker_page():
     )
 
 
-@app.route("/verify-workers")
-def verify_workers_page():
+@app.route("/admin-workers")
+def admin_workers_page():
     if not is_logged_in():
         return redirect("/login")
 
@@ -142,7 +143,7 @@ def verify_workers_page():
         return redirect("/")
 
     return render_template(
-        "verify_workers.html",
+        "admin_workers.html",
         username=session.get("username"),
         role=session.get("role")
     )
