@@ -8,13 +8,13 @@
 
 <body class="min-h-screen bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8] text-white">
 
-<!-- Navbar -->
+
 <div class="p-5 flex justify-between items-center border-b border-white/10 bg-white/5 backdrop-blur">
   <h1 class="text-xl font-bold">SafeHire</h1>
 
   <div class="flex gap-4">
     <a href="/post-job" class="bg-pink-500 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90">
-      + Post Job
+       Post Job
     </a>
     <a href="/logout" class="bg-purple-500 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90">
       Logout
@@ -22,11 +22,9 @@
   </div>
 </div>
 
-<!-- Title -->
 <div class="max-w-6xl mx-auto px-6 py-6">
   <h2 class="text-3xl font-bold mb-6">Jobs & Smart Matching</h2>
 
-  <!-- Jobs Container -->
   <div id="jobsContainer" class="grid md:grid-cols-2 gap-6"></div>
 </div>
 
@@ -70,7 +68,7 @@ async function loadJobs() {
           </span>
         </div>
 
-        <p class="mt-3 text-lg font-semibold">৳ ${job.budget}</p>
+        <p class="mt-3 text-lg font-semibold">BDT ${job.budget}</p>
 
         <div class="mt-4 space-y-3">
           ${workerHTML}

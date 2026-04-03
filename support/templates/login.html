@@ -59,7 +59,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
     return;
   }
 
-  msg.innerHTML = `<span class="text-green-400">Login successful! Redirecting...</span>`;
+  msg.innerHTML = `<span class="text-white-400">Login successful! Redirecting...</span>`;
   setTimeout(() => {
     if (result.redirect) {
       window.location.href = result.redirect;
