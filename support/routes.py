@@ -19,7 +19,33 @@ def home():
         username=session.get("username"),
         role=session.get("role")
     )
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "GET":
+        return render_template("signup.html")
 
+    data = request.get_json(silent=True) or {}
+
+    username = data.get("username", "").strip()
+    password = data.get("password", "").strip()
+    role = data.get("role", "").strip()
+
+    if not username or not password or role not in ["worker", "employer"]:
+        return jsonify({"error": "Invalid input"}), 400
+
+    if User.query.filter_by(username=username).first():
+        return jsonify({"error": "Username already exists"}), 400
+
+    new_user = User(
+        username=username,
+        password=password,
+        role=role
+    )
+
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({"message": "Signup successful!!!"}), 201
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -35,15 +61,17 @@ def login():
 
     if not user or user.password != password:
         return jsonify({"error": "Invalid credentials"}), 401
-
     session["user_id"] = user.id
     session["username"] = user.username
     session["role"] = user.role
 
     return jsonify({
-        "message": "Login successful",
-        "role": user.role
-    }), 200
+     "message": "Login successful!!!",
+     "role": user.role,
+     "redirect": "/verify-workers" if user.role == "admin"
+        else "/worker-dashboard" if user.role == "worker"
+        else "/jobs"
+}), 200
 
 
 @app.route("/logout")
