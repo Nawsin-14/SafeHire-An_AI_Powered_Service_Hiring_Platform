@@ -1,188 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Worker Dashboard - SafeHire</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SafeHire Worker Dashboard</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<script>
-tailwind.config = {
-theme: {
-extend: {
-fontFamily: { sans: ["Inter","ui-sans-serif","system-ui"] },
-
-colors: {
-brand: {
-50:"#F5D0FE",
-100:"#F0ABFC",
-500:"#EC4899",
-600:"#DB2777",
-700:"#BE185D"
-}
-}
-
-}
-}
-}
-</script>
-
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ["Inter","ui-sans-serif","system-ui"] },
+          colors: {
+            brand: {
+              50:"#F5D0FE",
+              100:"#F0ABFC",
+              500:"#EC4899",
+              600:"#DB2777",
+              700:"#BE185D"
+            }
+          }
+        }
+      }
+    }
+  </script>
 </head>
 
 <body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
 
-
-<header class="sticky top-0 z-50 bg-black/30 backdrop-blur border-b border-white/10">
-
-<div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-    
-<div class="flex items-center gap-3">
+  <header class="sticky top-0 z-50 bg-black/30 backdrop-blur border-b border-white/10">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
         <img 
           src="/static/images/SafeHire_logo.png"
           alt="SafeHire Logo"
           class="h-12 w-12 rounded-full shadow-lg"
         />
+        <div>
+          <p class="font-semibold leading-5 text-white">SafeHire</p>
+          <p class="text-xs text-gray-300 -mt-0.5">AI Powered Hiring Platform</p>
+        </div>
+      </div>
 
-<div>
-<p class="font-semibold leading-5 text-white">SafeHire</p>
-<p class="text-xs text-gray-300 -mt-0.5">AI Powered Hiring Platform</p>
-</div>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full">
+        <a class="hover:text-white" href="/">Home</a>
 
-</div>
+        {% if username %}
+          {% if role == "admin" %}
+            <a class="hover:text-white" href="/verify-workers">Verify</a>
+            <a class="hover:text-white" href="/transactions">Transactions</a>
+          {% elif role == "worker" %}
+            <a class="hover:text-white" href="/worker-dashboard">Dashboard</a>
+            <a class="hover:text-white" href="/add-worker">Profile</a>
+          {% elif role == "employer" %}
+            <a class="hover:text-white" href="/jobs">Jobs</a>
+            <a class="hover:text-white" href="/post-job">Post Job</a>
+            <a class="hover:text-white" href="/transactions">Transactions</a>
+          {% endif %}
 
-<nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full">
-  <a class="hover:text-white" href="/">Home</a>
+          <div class="flex items-center gap-3 ml-auto">
+            <span class="text-gray-300 text-sm">Hi, {{ username }}</span>
+            <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
+              Logout
+            </a>
+          </div>
+        {% else %}
+          <div class="flex items-center gap-3 ml-auto">
+            <a href="/login" class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90">
+              Login
+            </a>
+          </div>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
 
-  {% if username %}
-    {% if role == "admin" %}
-      <a class="hover:text-white" href="/worker-dashboard">Workers</a>
-      <a class="hover:text-white" href="/verify-workers">Verify</a>
-      <a class="hover:text-white" href="/transactions">Transactions</a>
-    {% elif role == "user" %}
-      <a class="hover:text-white" href="/worker-dashboard">Workers</a>
-      <a class="hover:text-white" href="/add-worker">Add Worker</a>
-      <a class="hover:text-white" href="/jobs">Jobs</a>
-      <a class="hover:text-white" href="/transactions">Transactions</a>
+  <main class="max-w-6xl mx-auto px-4 py-8">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div>
+        <p class="text-pink-300 text-sm font-medium">Worker Panel</p>
+        <h1 class="text-3xl font-bold">My Dashboard</h1>
+        <p class="text-gray-300 mt-1">Manage your profile, monitor assigned jobs, and track expected earnings.</p>
+      </div>
+
+      <div class="flex gap-3">
+        <a href="/add-worker" class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-semibold hover:opacity-90">
+          Update Profile
+        </a>
+      </div>
+    </div>
+
+    {% if worker %}
+
+    <section class="grid md:grid-cols-3 gap-4 mb-8">
+      <div class="bg-white/10 border border-white/10 rounded-3xl p-5 backdrop-blur shadow-xl">
+        <p class="text-sm text-gray-300">Assigned Jobs</p>
+        <h3 class="text-3xl font-bold mt-2">{{ assigned_jobs|length }}</h3>
+      </div>
+
+      <div class="bg-white/10 border border-white/10 rounded-3xl p-5 backdrop-blur shadow-xl">
+        <p class="text-sm text-gray-300">Expected Earnings</p>
+        <h3 class="text-3xl font-bold mt-2">BDT {{ assigned_jobs | sum(attribute='budget') }}</h3>
+      </div>
+
+      <div class="bg-white/10 border border-white/10 rounded-3xl p-5 backdrop-blur shadow-xl">
+        <p class="text-sm text-gray-300">Verification Status</p>
+        <div class="mt-3">
+          {% if worker.verification_status == "Verified" %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-400/20">
+              Verified
+            </span>
+          {% elif worker.verification_status == "Pending" %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-500/20 text-amber-300 border border-amber-400/20">
+              Pending
+            </span>
+          {% else %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-rose-500/20 text-rose-300 border border-rose-400/20">
+              Rejected
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-3 gap-6">
+
+      <div class="lg:col-span-1 bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur shadow-2xl">
+        <div class="flex items-center gap-4 mb-5">
+          <div class="h-14 w-14 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center text-xl font-bold shadow-lg">
+            {{ worker.name[0] }}
+          </div>
+          <div>
+            <h2 class="text-xl font-bold">{{ worker.name }}</h2>
+            <p class="text-sm text-gray-300">{{ worker.address }}</p>
+          </div>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div>
+            <p class="text-gray-400">Skills</p>
+            <p class="text-white font-medium mt-1">{{ worker.skills }}</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-gray-400">Experience</p>
+              <p class="text-white font-semibold mt-1">{{ worker.experience }} years</p>
+            </div>
+            <div>
+              <p class="text-gray-400">Rating</p>
+              <p class="text-white font-semibold mt-1">{{ worker.rating }}</p>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-gray-400">Phone Number</p>
+            <p class="text-white font-medium mt-1">{{ worker.phone }}</p>
+          </div>
+
+          <div>
+            <p class="text-gray-400">NID</p>
+            <p class="text-white font-medium mt-1">{{ worker.nid }}</p>
+          </div>
+
+          <div>
+            <p class="text-gray-400">Risk Score</p>
+            <div class="mt-2">
+              {% if worker.risk_score <= 20 %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-400/20">
+                  Low Risk ({{ worker.risk_score }})
+                </span>
+              {% elif worker.risk_score <= 50 %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-500/20 text-amber-300 border border-amber-400/20">
+                  Medium Risk ({{ worker.risk_score }})
+                </span>
+              {% else %}
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-rose-500/20 text-rose-300 border border-rose-400/20">
+                  High Risk ({{ worker.risk_score }})
+                </span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-2 bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur shadow-2xl">
+        <div class="flex items-center justify-between mb-5">
+          <h2 class="text-xl font-bold">Assigned Jobs</h2>
+          <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-pink-500/20 text-pink-300 border border-pink-400/20">
+            Active Work
+          </span>
+        </div>
+
+        {% if assigned_jobs %}
+          <div class="grid gap-4">
+            {% for job in assigned_jobs %}
+              <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+                <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div>
+                    <h3 class="text-lg font-semibold">{{ job.title }}</h3>
+                    <p class="text-sm text-gray-300 mt-1">{{ job.category }} • {{ job.location }}</p>
+                    <p class="text-sm text-gray-400 mt-3">{{ job.description or "No description provided." }}</p>
+                  </div>
+
+                  <div class="text-left md:text-right">
+                    <p class="text-sm text-gray-400">Budget</p>
+                    <p class="text-lg font-bold">৳ {{ job.budget }}</p>
+
+                    <div class="mt-3">
+                      {% if job.status == "assigned" %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-500/20 text-amber-300 border border-amber-400/20">
+                          Assigned
+                        </span>
+                      {% elif job.status == "open" %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-pink-500/20 text-pink-300 border border-pink-400/20">
+                          Open
+                        </span>
+                      {% else %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-purple-500/20 text-purple-300 border border-purple-400/20">
+                          {{ job.status }}
+                        </span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="text-center py-12">
+            <p class="text-white font-medium">No assigned jobs yet</p>
+            <p class="text-sm text-gray-400 mt-1">
+              Once an employer hires you, your job details will appear here
+            </p>
+          </div>
+        {% endif %}
+      </div>
+
+    </section>
+
+    {% else %}
+
+    <section class="bg-white/10 border border-white/10 rounded-3xl p-8 backdrop-blur shadow-2xl text-center">
+      <h2 class="text-2xl font-bold">No Worker Profile Found</h2>
+      <p class="text-gray-300 mt-2">
+        Your account is logged in as a worker, but no worker profile has been created yet
+      </p>
+      <a href="/add-worker" class="inline-flex mt-5 px-5 py-3 rounded-2xl bg-pink-500 text-white font-medium hover:opacity-90">
+        Create Worker Profile
+      </a>
+    </section>
+
     {% endif %}
 
-    <div class="flex items-center gap-3 ml-auto">
-      <span class="text-gray-300 text-sm">Hi, {{ username }}</span>
-      <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
-        Logout
-      </a>
-    </div>
-
-  {% else %}
-    <div class="flex items-center gap-3 ml-auto">
-      <a href="/login" class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90">
-        Login
-      </a>
-      <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
-       Logout
-      </a>
-    </div>
-  {% endif %}
-</nav>
-
-</div>
-
-</header>
-
-
-<main class="max-w-6xl mx-auto px-4 py-8">
-
-
-<div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
-
-<div>
-<h1 class="text-3xl font-semibold">Registered Workers</h1>
-</div>
-
-
-<div class="w-full md:w-[360px]">
-
-<div class="flex items-center gap-2 bg-white/10 border border-white/10 rounded-3xl px-3 py-2 backdrop-blur">
-
-<span class="text-gray-300">🔎</span>
-
-<input
-id="searchInput"
-type="text"
-placeholder="Search by name, skill, location..."
-class="w-full bg-transparent outline-none text-sm placeholder:text-gray-400 text-white"
-/>
-
-</div>
-
-</div>
-
-</div>
-
-
-<div class="flex flex-wrap gap-0 mb-6">
-
-<button class="px-3 py-1.5 rounded-full text-sm border border-white/10 bg-white/10 hover:bg-white/20">
-All
-</button>
-
-<button class="px-3 py-1.5 rounded-full text-sm border border-emerald-400/20 bg-emerald-500/20 text-emerald-300">
-Verified
-</button>
-
-<button class="px-3 py-1.5 rounded-full text-sm border border-amber-400/20 bg-amber-500/20 text-amber-300">
-Pending
-</button>
-
-<button class="px-3 py-1.5 rounded-full text-sm border border-purple-400/20 bg-purple-500/20 text-purple-300">
-Matched
-</button>
-
-</div>
-
-
-<section class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur">
-
-
-<div id="emptyState" class="text-center py-10">
-
-<p class="text-white font-medium">Loading workers…</p>
-
-<p class="text-sm text-gray-400 mt-1">
-If nothing appears, check your API / JS console.
-</p>
-
-</div>
-
-
-<div id="workerList" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
-
-</section>
-
-
-</main>
-
-
-<script src="/static/js/worker_dashboard.js"></script>
-
-<script>
-
-const workerList = document.getElementById("workerList")
-const emptyState = document.getElementById("emptyState")
-
-const obs = new MutationObserver(() => {
-if (workerList.children.length > 0)
-emptyState.style.display = "none"
-})
-
-obs.observe(workerList,{childList:true})
-
-</script>
+  </main>
 
 </body>
 </html>
