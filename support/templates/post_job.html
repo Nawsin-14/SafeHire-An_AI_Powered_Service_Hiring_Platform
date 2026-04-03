@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Post Job</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8] text-white">
+
+<div class="bg-white/10 backdrop-blur p-8 rounded-3xl w-96 shadow-xl">
+
+  <h2 class="text-2xl font-bold text-center mb-6">Post a Job</h2>
+
+  <form id="jobForm" class="space-y-4">
+
+    <input id="title" placeholder="Job Title"
+      class="w-full p-3 rounded-xl bg-white/10 border border-white/20" required>
+
+    <input id="category" placeholder="Category"
+      class="w-full p-3 rounded-xl bg-white/10 border border-white/20" required>
+
+    <input id="location" placeholder="Location"
+      class="w-full p-3 rounded-xl bg-white/10 border border-white/20" required>
+
+    <input id="budget" type="number" placeholder="Budget"
+      class="w-full p-3 rounded-xl bg-white/10 border border-white/20" required>
+
+    <textarea id="description" placeholder="Description"
+      class="w-full p-3 rounded-xl bg-white/10 border border-white/20"></textarea>
+
+    <button class="w-full py-3 bg-pink-500 rounded-xl font-semibold hover:opacity-90">
+      Post Job
+    </button>
+
+  </form>
+
+  <p class="text-center mt-4 text-sm">
+    <a href="/jobs" class="underline">Back to Jobs</a>
+  </p>
+
+  <p id="msg" class="text-center mt-3 text-sm"></p>
+
+</div>
+
+<script>
+document.getElementById("jobForm").addEventListener("submit", async function(e) {
+  e.preventDefault();
+
+  const data = {
+    title: document.getElementById("title").value,
+    category: document.getElementById("category").value,
+    location: document.getElementById("location").value,
+    budget: document.getElementById("budget").value,
+    description: document.getElementById("description").value
+  };
+
+  const res = await fetch("/add_job", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+  const msg = document.getElementById("msg");
+
+  if (!res.ok) {
+    msg.innerHTML = `<span class="text-red-400">${result.error}</span>`;
+    return;
+  }
+
+  msg.innerHTML = `<span class="text-white-400">Job posted! Redirecting...</span>`;
+
+  setTimeout(() => {
+    window.location.href = "/jobs";
+  }, 800);
+});
+</script>
+
+</body>
+</html>
