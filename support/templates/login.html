@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login - SafeHire</title>
+  <meta charset="UTF-8">
+  <title>SafeHire Login</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -12,17 +13,28 @@
 
     <form id="loginForm" class="space-y-4">
       <input name="username" placeholder="Username"
-        class="w-full p-3 rounded-xl bg-white/10 border border-white/20" required>
+        class="w-full p-3 rounded-xl bg-white/10 border border-white/20 placeholder-gray-300 
+        focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition"
+        required>
 
       <input name="password" type="password" placeholder="Password"
-        class="w-full p-3 rounded-xl bg-white/10 border border-white/20" required>
+        class="w-full p-3 rounded-xl bg-white/10 border border-white/20 placeholder-gray-300 
+        focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-transparent transition"
+        required>
 
-      <button class="w-full py-3 bg-pink-500 rounded-xl font-semibold hover:opacity-90">
+      <button type="submit"
+       class="w-full py-3 bg-pink-500 rounded-xl font-semibold hover:bg-pink-600 transition duration-200 shadow-md">
         Login
       </button>
+      <p class="text-center mt-4 text-sm text-gray-200">
+        Don’t have an account?
+        <a href="/signup" class="font-semibold text-white hover:underline">
+          Create account
+       </a>
+     </p>
     </form>
 
-    <p id="error" class="text-red-400 text-sm mt-3 text-center"></p>
+     <div id="msg" class="text-center text-sm mt-4"></div>
   </div>
 
 <script>
@@ -31,6 +43,8 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
 
   const formData = new FormData(this);
   const data = Object.fromEntries(formData.entries());
+  const msg = document.getElementById("msg");
+  msg.innerHTML = "Logging in...";
 
   const res = await fetch("/login", {
     method: "POST",
@@ -41,17 +55,25 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
   const result = await res.json();
 
   if (!res.ok) {
-    document.getElementById("error").innerText = result.error;
+    msg.innerHTML = `<span class="text-red-400">${result.error}</span>`;
     return;
   }
 
+  msg.innerHTML = `<span class="text-green-400">Login successful! Redirecting...</span>`;
+  setTimeout(() => {
+    if (result.redirect) {
+      window.location.href = result.redirect;
+    } else {
   if (result.role === "admin") {
     window.location.href = "/verify-workers";
+  } else if (result.role === "worker") {
+    window.location.href = "/worker-dashboard";
   } else {
     window.location.href = "/jobs";
   }
+}
+}, 800);
 });
 </script>
-
 </body>
 </html>
