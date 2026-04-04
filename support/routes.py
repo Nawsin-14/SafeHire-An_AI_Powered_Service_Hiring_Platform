@@ -180,11 +180,11 @@ def post_job_page():
 def transactions_page():
     if not is_logged_in():
         return redirect("/login")
-    
-    if not has_role("admin"):
+
+    if not has_role("admin", "employer"):
         return redirect("/")
 
-       return render_template(
+    return render_template(
         "transactions.html",
         username=session.get("username"),
         role=session.get("role")
@@ -435,10 +435,13 @@ def get_transactions():
     if not is_logged_in():
         return jsonify({"error": "Login required"}), 401
 
-    if not has_role("admin"):
-        return jsonify({"error": "Only admin can view transactions"}), 403
+    if has_role("admin"):
+        transactions = HireTransaction.query.all()
+    elif has_role("employer"):
+        transactions = HireTransaction.query.filter_by(employer_id=session["user_id"]).all()
+    else:
+        return jsonify({"error": "Unauthorized"}), 403
 
-    transactions = HireTransaction.query.all()
     result = []
 
     for t in transactions:
