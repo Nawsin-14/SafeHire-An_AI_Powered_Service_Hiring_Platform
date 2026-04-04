@@ -180,8 +180,11 @@ def post_job_page():
 def transactions_page():
     if not is_logged_in():
         return redirect("/login")
+    
+    if not has_role("admin"):
+        return redirect("/")
 
-    return render_template(
+       return render_template(
         "transactions.html",
         username=session.get("username"),
         role=session.get("role")
@@ -429,6 +432,12 @@ def hire_worker():
 
 @app.route("/transactions_api", methods=["GET"])
 def get_transactions():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("admin"):
+        return jsonify({"error": "Only admin can view transactions"}), 403
+
     transactions = HireTransaction.query.all()
     result = []
 

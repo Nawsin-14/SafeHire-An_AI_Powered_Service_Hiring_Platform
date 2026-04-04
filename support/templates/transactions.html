@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Transactions - SafeHire</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,93 +10,163 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com"></script>
+
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui"] },
-          colors: {
-            brand: {
-              50: "#F5D0FE",
-              100: "#F0ABFC",
-              500: "#EC4899",
-              600: "#DB2777",
-              700: "#BE185D"
-            }
-          },
-          boxShadow: {
-            glow: "0 0 40px rgba(236,72,153,0.25)"
+          fontFamily: {
+            sans: ["Inter", "ui-sans-serif", "system-ui"]
           }
         }
       }
     }
   </script>
 </head>
-
 <body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
-  <header class="sticky top-0 z-50 bg-black/30 backdrop-blur border-b border-white/10">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="h-9 w-9 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center font-bold text-white">
-          S
-        </div>
-        <div>
-          <p class="font-semibold leading-5 text-white">SafeHire</p>
-          <p class="text-xs text-gray-300 -mt-0.5">AI Powered Hiring Platform</p>
-        </div>
+
+  <header class="bg-white/10 backdrop-blur border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-extrabold">SafeHire Transactions</h1>
+        <p class="text-sm text-white/70">Track all hiring records in one place</p>
       </div>
 
-<nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full">
-  <a class="hover:text-white" href="/">Home</a>
-
-  {% if username %}
-    {% if role == "admin" %}
-      <a class="hover:text-white" href="/worker-dashboard">Workers</a>
-      <a class="hover:text-white" href="/verify-workers">Verify</a>
-      <a class="hover:text-white" href="/transactions">Transactions</a>
-    {% elif role == "user" %}
-      <a class="hover:text-white" href="/worker-dashboard">Workers</a>
-      <a class="hover:text-white" href="/add-worker">Add Worker</a>
-      <a class="hover:text-white" href="/jobs">Jobs</a>
-      <a class="hover:text-white" href="/transactions">Transactions</a>
-    {% endif %}
-
-    <div class="flex items-center gap-3 ml-auto">
-      <span class="text-gray-300 text-sm">Hi, {{ username }}</span>
-      <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
-        Logout
-      </a>
-    </div>
-
-  {% else %}
-    <div class="flex items-center gap-3 ml-auto">
-      <a href="/login" class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90">
-        Login
-      </a>
-      <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
-        Logout
-      </a>
-    </div>
-  {% endif %}
-</nav>
+      <div class="flex items-center gap-3">
+        <a href="/admin-dashboard"
+           class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-semibold transition">
+          Dashboard
+        </a>
+        <a href="/logout"
+           class="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 px-4 py-2 rounded-lg text-sm font-semibold text-white transition">
+          Logout
+        </a>
+      </div>
     </div>
   </header>
 
-  <main class="max-w-6xl mx-auto px-4 py-8">
-    <div class="mb-6">
-      <div class="inline-flex items-center px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur text-sm text-pink-200 mb-4">
-        Hiring Record Monitor
+  <main class="max-w-7xl mx-auto px-6 py-8">
+    
+    <section class="mb-6">
+      <div class="bg-white/10 backdrop-blur border border-white/10 rounded-2xl p-6 shadow-lg">
+        <h2 class="text-xl font-bold mb-2">Transactions Overview</h2>
+        <p class="text-white/70 text-sm">
+          This page shows all employer-worker hiring transactions recorded in SafeHire.
+        </p>
       </div>
+    </section>
 
-      <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-white">Transactions</h1>
-      <p class="text-gray-300 mt-2">Track hiring records for transparency and accountability.</p>
-    </div>
+    <section>
+      <div class="bg-white/10 backdrop-blur border border-white/10 rounded-2xl shadow-lg overflow-hidden">
+        
+        <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+          <div>
+            <h2 class="text-xl font-bold">All Transactions</h2>
+            <p class="text-sm text-white/70">Hiring history and assigned payment records</p>
+          </div>
 
-    <section class="bg-white/5 border border-white/10 rounded-3xl p-6 backdrop-blur-xl shadow-2xl">
-      <div id="transactionList" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+          <button onclick="loadTransactions()"
+                  class="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 px-4 py-2 rounded-lg text-sm font-semibold text-white transition">
+            Refresh
+          </button>
+        </div>
+
+        <div id="loading" class="px-6 py-6 text-white/70">
+          Loading transactions...
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full hidden text-white" id="transactionsTable">
+            <thead class="bg-white/10">
+              <tr class="text-left text-sm text-white/70">
+                <th class="px-6 py-4 font-semibold">ID</th>
+                <th class="px-6 py-4 font-semibold">Employer</th>
+                <th class="px-6 py-4 font-semibold">Worker</th>
+                <th class="px-6 py-4 font-semibold">Job Title</th>
+                <th class="px-6 py-4 font-semibold">Location</th>
+                <th class="px-6 py-4 font-semibold text-center">Amount</th>
+                <th class="px-6 py-4 font-semibold text-center">Status</th>
+                <th class="px-6 py-4 font-semibold">Created At</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsBody" class="divide-y divide-white/10"></tbody>
+          </table>
+        </div>
+
+        <div id="emptyState" class="hidden px-6 py-10 text-center text-white/70">
+          No transactions found.
+        </div>
+      </div>
     </section>
   </main>
 
-  <script src="/static/js/transactions.js"></script>
+  <script>
+    function getStatusBadge(status) {
+      const value = (status || "").toLowerCase();
+
+      if (value === "assigned") {
+        return `<span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Assigned</span>`;
+      }
+
+      if (value === "completed") {
+        return `<span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Completed</span>`;
+      }
+
+      if (value === "cancelled") {
+        return `<span class="inline-flex rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">Cancelled</span>`;
+      }
+
+      return `<span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">${status || "Unknown"}</span>`;
+    }
+
+    async function loadTransactions() {
+      const loading = document.getElementById("loading");
+      const table = document.getElementById("transactionsTable");
+      const tbody = document.getElementById("transactionsBody");
+      const emptyState = document.getElementById("emptyState");
+
+      loading.classList.remove("hidden");
+      table.classList.add("hidden");
+      emptyState.classList.add("hidden");
+      tbody.innerHTML = "";
+
+      try {
+        const response = await fetch("/transactions_api");
+        const transactions = await response.json();
+
+        loading.classList.add("hidden");
+
+        if (!Array.isArray(transactions) || transactions.length === 0) {
+          emptyState.classList.remove("hidden");
+          return;
+        }
+
+        table.classList.remove("hidden");
+
+        transactions.forEach(transaction => {
+          const row = document.createElement("tr");
+          row.className = "hover:bg-white/5 transition";
+
+          row.innerHTML = `
+            <td class="px-6 py-4 text-sm">${transaction.id ?? ""}</td>
+            <td class="px-6 py-4 text-sm font-medium">${transaction.employer_name ?? ""}</td>
+            <td class="px-6 py-4 text-sm font-medium">${transaction.worker_name ?? ""}</td>
+            <td class="px-6 py-4 text-sm">${transaction.job_title ?? ""}</td>
+            <td class="px-6 py-4 text-sm">${transaction.location ?? ""}</td>
+            <td class="px-6 py-4 text-sm text-center">৳${transaction.amount ?? 0}</td>
+            <td class="px-6 py-4 text-sm text-center">${getStatusBadge(transaction.status)}</td>
+            <td class="px-6 py-4 text-sm">${transaction.created_at ?? ""}</td>
+          `;
+
+          tbody.appendChild(row);
+        });
+
+      } catch (error) {
+        loading.textContent = "Failed to load transactions.";
+      }
+    }
+
+    loadTransactions();
+  </script>
 </body>
 </html>
