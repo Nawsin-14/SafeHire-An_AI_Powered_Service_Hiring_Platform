@@ -154,12 +154,14 @@ def jobs_page():
     if not is_logged_in():
         return redirect("/login")
 
+    if not has_role("employer", "admin"):
+        return redirect("/")
+
     return render_template(
         "jobs.html",
         username=session.get("username"),
         role=session.get("role")
     )
-
 
 @app.route("/post-job")
 def post_job_page():
@@ -279,7 +281,16 @@ def verify_worker(worker_id):
 
 @app.route("/jobs_api", methods=["GET"])
 def get_jobs():
-    jobs = Job.query.all()
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if has_role("admin"):
+        jobs = Job.query.all()
+    elif has_role("employer"):
+        jobs = Job.query.filter_by(employer_id=session["user_id"]).all()
+    else:
+        return jsonify({"error": "Unauthorized"}), 403
+
     return jsonify([job.to_dict() for job in jobs])
 
 
@@ -329,10 +340,19 @@ def add_job():
 
 @app.route("/job_matches", methods=["GET"])
 def get_job_matches():
-    try:
-        jobs = Job.query.all()
-        workers = Worker.query.all()
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
 
+    if not has_role("employer", "admin"):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    try:
+        if has_role("admin"):
+            jobs = Job.query.all()
+        else:
+            jobs = Job.query.filter_by(employer_id=session["user_id"]).all()
+
+        workers = Worker.query.all()
         result = []
 
         for job in jobs:
@@ -374,7 +394,6 @@ def get_job_matches():
             "error": str(e),
             "type": type(e).__name__
         }), 500
-
 
 @app.route("/hire", methods=["POST"])
 def hire_worker():
