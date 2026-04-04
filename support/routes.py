@@ -69,7 +69,7 @@ def login():
     return jsonify({
      "message": "Login successful!!!",
      "role": user.role,
-     "redirect": "/admin-workers" if user.role == "admin"
+     "redirect": "/admin-dashboard" if user.role == "admin"
         else "/worker-dashboard" if user.role == "worker"
         else "/jobs"
 }), 200
@@ -87,7 +87,7 @@ def dashboard():
         return redirect("/login")
 
     if session.get("role") == "admin":
-        return redirect("/admin-workers")
+        return redirect("/admin-dashboard")
     elif session.get("role") == "employer":
         return redirect("/jobs")
     elif session.get("role") == "worker":
@@ -449,3 +449,26 @@ def get_transactions():
         })
 
     return jsonify(result)
+
+@app.route("/admin-dashboard")
+def admin_dashboard():
+    if not is_logged_in():
+        return redirect("/login")
+
+    if not has_role("admin"):
+        return redirect("/")
+
+    total_workers = Worker.query.count()
+    total_employers = User.query.filter_by(role="employer").count()
+    total_jobs = Job.query.count()
+    total_transactions = HireTransaction.query.count()
+
+    return render_template(
+        "admin_dashboard.html",
+        username=session.get("username"),
+        role=session.get("role"),
+        total_workers=total_workers,
+        total_employers=total_employers,
+        total_jobs=total_jobs,
+        total_transactions=total_transactions
+    )
