@@ -2,6 +2,7 @@ from flask import jsonify, render_template, redirect, request, session
 from support.app import app
 from support.models import db, Worker, Job, HireTransaction, User, Review
 from support.services.matching import calculate_match_score
+from sqlalchemy import desc
 
 
 def is_logged_in():
@@ -205,6 +206,37 @@ def transactions_page():
         role=session.get("role")
     )
 
+@app.route("/pay_transaction", methods=["POST"])
+def pay_transaction():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("employer"):
+        return jsonify({"error": "Only employers can make payment"}), 403
+
+    data = request.get_json(silent=True) or {}
+    transaction_id = data.get("transaction_id")
+
+    if not transaction_id:
+        return jsonify({"error": "Transaction ID required"}), 400
+
+    transaction = HireTransaction.query.get(transaction_id)
+
+    if not transaction:
+        return jsonify({"error": "Transaction not found"}), 404
+
+    if transaction.employer_id != session["user_id"]:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    if transaction.status == "completed":
+        return jsonify({"error": "Already paid"}), 400
+
+    # ✅ Update status
+    transaction.status = "completed"
+
+    db.session.commit()
+
+    return jsonify({"message": "Payment successful"}), 200
 
 @app.route("/workers", methods=["GET"])
 def get_workers():
@@ -489,7 +521,10 @@ def get_transactions():
             "location": job.location if job else "Unknown",
             "amount": t.amount,
             "status": t.status,
-            "created_at": str(t.created_at)
+            "created_at": t.created_at.strftime("%Y-%m-%d"),
+            "worker_id": t.worker_id,
+            "job_id": t.job_id,
+            "transaction_id": t.id
         })
 
     return jsonify(result)
@@ -516,3 +551,87 @@ def admin_dashboard():
         total_jobs=total_jobs,
         total_transactions=total_transactions
     )
+
+
+@app.route("/add_review", methods=["POST"])
+def add_review():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("employer"):
+        return jsonify({"error": "Only employers can review"}), 403
+
+    data = request.get_json(silent=True) or {}
+
+    worker_id = data.get("worker_id")
+    job_id = data.get("job_id")
+    rating = data.get("rating")
+    comment = (data.get("comment") or "").strip()
+
+    if not all([worker_id, job_id, rating, comment]):
+        return jsonify({"error": "Missing fields"}), 400
+
+    try:
+        worker_id = int(worker_id)
+        job_id = int(job_id)
+        rating = float(rating)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid input values"}), 400
+
+    if rating < 1 or rating > 5:
+        return jsonify({"error": "Rating must be between 1 and 5"}), 400
+
+    worker = Worker.query.get(worker_id)
+    if not worker:
+        return jsonify({"error": "Worker not found"}), 404
+
+    job = Job.query.get(job_id)
+    if not job:
+        return jsonify({"error": "Job not found"}), 404
+
+    if job.employer_id != session["user_id"]:
+        return jsonify({"error": "You can only review workers for your own jobs"}), 403
+
+    if job.assigned_worker_id != worker_id:
+        return jsonify({"error": "This worker was not assigned to this job"}), 400
+
+    transaction = HireTransaction.query.filter_by(
+        employer_id=session["user_id"],
+        worker_id=worker_id,
+        job_id=job_id
+    ).order_by(desc(HireTransaction.created_at)).first()
+
+    if not transaction:
+        return jsonify({"error": "No valid transaction found"}), 404
+
+    existing = Review.query.filter_by(transaction_id=transaction.id).first()
+    if existing:
+        return jsonify({"error": "Review already submitted"}), 400
+
+    review = Review(
+        employer_id=session["user_id"],
+        worker_id=worker_id,
+        transaction_id=transaction.id,
+        rating=rating,
+        comment=comment
+    )
+
+    db.session.add(review)
+
+    all_reviews = Review.query.filter_by(worker_id=worker_id).all()
+    total = sum(float(r.rating) for r in all_reviews) + float(rating)
+    count = len(all_reviews) + 1
+
+    worker.rating = round(total / count, 2)
+
+    db.session.commit()
+
+    return jsonify({
+        "message": "Review added successfully",
+        "worker_rating": worker.rating
+    }), 201
+
+@app.route("/get_reviews/<int:worker_id>")
+def get_reviews(worker_id):
+    reviews = Review.query.filter_by(worker_id=worker_id).all()
+    return jsonify([r.to_dict() for r in reviews])

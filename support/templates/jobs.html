@@ -12,22 +12,32 @@
     <h1 class="text-xl font-bold">SafeHire</h1>
 
     <div class="flex gap-4">
-      <a href="/post-job" class="bg-pink-500 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90">
+
+      <a href="/transactions"
+         class="bg-blue-500 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90">
+        Transactions
+      </a>
+
+      <a href="/post-job"
+         class="bg-pink-500 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90">
         Post Job
       </a>
-      <a href="/logout" class="bg-purple-500 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90">
+
+      <a href="/logout"
+         class="bg-purple-500 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90">
         Logout
       </a>
+
     </div>
   </div>
 
   <div class="max-w-6xl mx-auto px-6 py-6">
     <h2 class="text-3xl font-bold mb-6">Jobs & Smart Matching</h2>
-
     <div id="jobsContainer" class="grid md:grid-cols-2 gap-6"></div>
   </div>
 
   <script>
+
     function getJobStatusBadge(status) {
       const value = (status || "").toLowerCase();
 
@@ -106,7 +116,7 @@
                   <div>
                     <p class="font-semibold text-lg">${w.worker_name}</p>
                     <p class="text-sm text-gray-300 mt-1">${w.skills}</p>
-                    <p class="text-sm text-white/70 mt-1">Experience: ${w.experience ?? 0} years</p>
+                    <p class="text-sm text-white/70 mt-1">Experience: ${w.experience ?? 4} years</p>
                     <p class="text-sm mt-1">${renderRating(w.rating)}</p>
                   </div>
 
@@ -139,6 +149,7 @@
             </div>
           `;
         });
+
       } catch (error) {
         document.getElementById("jobsContainer").innerHTML = `
           <div class="col-span-full bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 text-red-300">
@@ -165,12 +176,14 @@
 
         alert("Worker hired successfully!");
         loadJobs();
+
       } catch (error) {
         alert("Something went wrong");
       }
     }
 
     loadJobs();
+
   </script>
 
 </body>

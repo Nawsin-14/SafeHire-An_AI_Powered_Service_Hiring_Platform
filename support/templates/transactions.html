@@ -2,13 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SafeHire Transactions</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
   <script src="https://cdn.tailwindcss.com"></script>
 
   <script>
@@ -23,146 +20,234 @@
     }
   </script>
 </head>
+
 <body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
 
-  <header class="bg-white/10 backdrop-blur border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-extrabold">SafeHire Transactions</h1>
-      </div>
+<header class="bg-white/10 backdrop-blur border-b border-white/10">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <h1 class="text-2xl font-extrabold">SafeHire Transactions</h1>
 
-      <div class="flex items-center gap-3">
-        <a href="/admin-dashboard"
-           class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-semibold transition">
-          Dashboard
-        </a>
-        <a href="/logout"
-           class="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 px-4 py-2 rounded-lg text-sm font-semibold text-white transition">
-          Logout
-        </a>
-      </div>
+    <div class="flex gap-3">
+      <a href="/dashboard" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-semibold">
+        Dashboard
+      </a>
+      <a href="/logout" class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-lg text-sm font-semibold">
+        Logout
+      </a>
     </div>
-  </header>
+  </div>
+</header>
 
-  <main class="max-w-7xl mx-auto px-6 py-8">
-    
-    <section class="mb-6">
-      <div class="bg-white/10 backdrop-blur border border-white/10 rounded-2xl p-6 shadow-lg">
-        <h2 class="text-xl font-bold mb-2">Transactions Overview</h2>
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+  <div class="bg-white/10 backdrop-blur border border-white/10 rounded-2xl overflow-hidden">
+
+    <div class="px-6 py-5 border-b border-white/10 flex justify-between">
+      <div>
+        <h2 class="text-xl font-bold">All Transactions</h2>
+        <p class="text-sm text-white/70">Hiring & payments</p>
       </div>
-    </section>
 
-    <section>
-      <div class="bg-white/10 backdrop-blur border border-white/10 rounded-2xl shadow-lg overflow-hidden">
-        
-        <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between">
-          <div>
-            <h2 class="text-xl font-bold">All Transactions</h2>
-            <p class="text-sm text-white/70">Hiring history and assigned payment records</p>
-          </div>
+      <button onclick="loadTransactions()"
+        class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-lg text-sm font-semibold">
+        Refresh
+      </button>
+    </div>
 
-          <button onclick="loadTransactions()"
-                  class="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 px-4 py-2 rounded-lg text-sm font-semibold text-white transition">
-            Refresh
-          </button>
-        </div>
+    <div id="loading" class="px-6 py-6 text-white/70">Loading...</div>
 
-        <div id="loading" class="px-6 py-6 text-white/70">
-          Loading transactions...
-        </div>
+    <table id="transactionsTable" class="min-w-full hidden">
+      <thead class="bg-white/10 text-white/70 text-sm">
+        <tr>
+          <th class="px-6 py-4">ID</th>
+          <th class="px-6 py-4">Employer</th>
+          <th class="px-6 py-4">Worker</th>
+          <th class="px-6 py-4">Job</th>
+          <th class="px-6 py-4 text-center">Amount</th>
+          <th class="px-6 py-4 text-center">Status</th>
+          <th class="px-6 py-4 text-center">Action</th>
+        </tr>
+      </thead>
 
-        <div class="overflow-x-auto">
-          <table class="min-w-full hidden text-white" id="transactionsTable">
-            <thead class="bg-white/10">
-              <tr class="text-left text-sm text-white/70">
-                <th class="px-6 py-4 font-semibold">ID</th>
-                <th class="px-6 py-4 font-semibold">Employer</th>
-                <th class="px-6 py-4 font-semibold">Worker</th>
-                <th class="px-6 py-4 font-semibold">Job Title</th>
-                <th class="px-6 py-4 font-semibold">Location</th>
-                <th class="px-6 py-4 font-semibold text-center">Amount</th>
-                <th class="px-6 py-4 font-semibold text-center">Status</th>
-                <th class="px-6 py-4 font-semibold">Created At</th>
-              </tr>
-            </thead>
-            <tbody id="transactionsBody" class="divide-y divide-white/10"></tbody>
-          </table>
-        </div>
+      <tbody id="transactionsBody" class="divide-y divide-white/10"></tbody>
+    </table>
 
-        <div id="emptyState" class="hidden px-6 py-10 text-center text-white/70">
-          No transactions found
-        </div>
-      </div>
-    </section>
-  </main>
+    <div id="emptyState" class="hidden px-6 py-10 text-center text-white/70">
+      No transactions found
+    </div>
 
-  <script>
-    function getStatusBadge(status) {
-      const value = (status || "").toLowerCase();
+  </div>
+</main>
 
-      if (value === "assigned") {
-        return `<span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Assigned</span>`;
-      }
+<div id="reviewModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
 
-      if (value === "completed") {
-        return `<span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">Completed</span>`;
-      }
+  <div class="w-full max-w-md rounded-3xl border border-white/10 bg-gradient-to-br from-[#16112B] via-[#22123F] to-[#3B1364] p-6">
 
-      if (value === "cancelled") {
-        return `<span class="inline-flex rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">Cancelled</span>`;
-      }
+    <div class="flex justify-between mb-4">
+      <h2 class="text-xl font-bold">Leave Review</h2>
+      <button onclick="closeModal()" class="text-white/60 hover:text-white text-xl">&times;</button>
+    </div>
 
-      return `<span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">${status || "Unknown"}</span>`;
-    }
+    <input id="ratingInput" type="number" min="1" max="5" step="0.1"
+      class="w-full mb-3 p-3 rounded-xl bg-white/10 border border-white/10"
+      placeholder="Rating (1-5)">
 
-    async function loadTransactions() {
-      const loading = document.getElementById("loading");
-      const table = document.getElementById("transactionsTable");
-      const tbody = document.getElementById("transactionsBody");
-      const emptyState = document.getElementById("emptyState");
+    <textarea id="commentInput" rows="4"
+      class="w-full mb-4 p-3 rounded-xl bg-white/10 border border-white/10"
+      placeholder="Write review"></textarea>
 
-      loading.classList.remove("hidden");
-      table.classList.add("hidden");
-      emptyState.classList.add("hidden");
-      tbody.innerHTML = "";
+    <div class="grid grid-cols-2 gap-3">
+      <button onclick="submitReview()"
+        class="bg-gradient-to-r from-pink-500 to-purple-600 py-2 rounded-xl">
+        Submit
+      </button>
 
-      try {
-        const response = await fetch("/transactions_api");
-        const transactions = await response.json();
+      <button onclick="closeModal()"
+        class="bg-white/10 py-2 rounded-xl">
+        Cancel
+      </button>
+    </div>
 
-        loading.classList.add("hidden");
+  </div>
+</div>
 
-        if (!Array.isArray(transactions) || transactions.length === 0) {
-          emptyState.classList.remove("hidden");
-          return;
-        }
+<script>
 
-        table.classList.remove("hidden");
+let selectedWorkerId = null;
+let selectedJobId = null;
+let selectedTransactionId = null;
 
-        transactions.forEach(transaction => {
-          const row = document.createElement("tr");
-          row.className = "hover:bg-white/5 transition";
+function getStatusBadge(status){
+  const s = (status||"").toLowerCase();
 
-          row.innerHTML = `
-            <td class="px-6 py-4 text-sm">${transaction.id ?? ""}</td>
-            <td class="px-6 py-4 text-sm font-medium">${transaction.employer_name ?? ""}</td>
-            <td class="px-6 py-4 text-sm font-medium">${transaction.worker_name ?? ""}</td>
-            <td class="px-6 py-4 text-sm">${transaction.job_title ?? ""}</td>
-            <td class="px-6 py-4 text-sm">${transaction.location ?? ""}</td>
-            <td class="px-6 py-4 text-sm text-center">৳${transaction.amount ?? 0}</td>
-            <td class="px-6 py-4 text-sm text-center">${getStatusBadge(transaction.status)}</td>
-            <td class="px-6 py-4 text-sm">${transaction.created_at ?? ""}</td>
-          `;
+  if(s==="assigned"){
+    return `<span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs">Assigned</span>`;
+  }
 
-          tbody.appendChild(row);
-        });
+  if(s==="completed"){
+    return `<span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 text-xs">Completed</span>`;
+  }
 
-      } catch (error) {
-        loading.textContent = "Failed to load transactions.";
-      }
-    }
+  return `<span class="px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-xs">${status}</span>`;
+}
 
-    loadTransactions();
-  </script>
+function getActionButtons(t){
+
+  const s = (t.status||"").toLowerCase();
+
+  if(s==="assigned"){
+    return `
+      <button onclick="payNow(${t.id})"
+      class="bg-green-500 px-3 py-2 rounded-lg text-xs font-semibold">
+      Pay Now
+      </button>`;
+  }
+
+  if(s==="completed"){
+    return `
+      <button onclick="openReviewModal(${t.worker_id},${t.job_id},${t.id})"
+      class="bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-2 rounded-lg text-xs font-semibold">
+      Review
+      </button>`;
+  }
+
+  return `<span class="text-white/40 text-xs">—</span>`;
+}
+
+async function loadTransactions(){
+
+  const loading = document.getElementById("loading");
+  const table = document.getElementById("transactionsTable");
+  const body = document.getElementById("transactionsBody");
+  const empty = document.getElementById("emptyState");
+
+  loading.classList.remove("hidden");
+  table.classList.add("hidden");
+  empty.classList.add("hidden");
+  body.innerHTML="";
+
+  const res = await fetch("/transactions_api");
+  const data = await res.json();
+
+  loading.classList.add("hidden");
+
+  if(!data.length){
+    empty.classList.remove("hidden");
+    return;
+  }
+
+  table.classList.remove("hidden");
+
+  data.forEach(t=>{
+    body.innerHTML += `
+      <tr class="hover:bg-white/5">
+        <td class="px-6 py-4">${t.id}</td>
+        <td class="px-6 py-4">${t.employer_name}</td>
+        <td class="px-6 py-4">${t.worker_name}</td>
+        <td class="px-6 py-4">${t.job_title}</td>
+        <td class="px-6 py-4 text-center font-semibold text-white">
+         BDT ${Number(t.amount).toLocaleString()}
+        </td>
+        <td class="px-6 py-4 text-center">${getStatusBadge(t.status)}</td>
+        <td class="px-6 py-4 text-center">${getActionButtons(t)}</td>
+      </tr>
+    `;
+  });
+
+}
+
+function openReviewModal(w,j,t){
+  selectedWorkerId=w;
+  selectedJobId=j;
+  selectedTransactionId=t;
+
+  document.getElementById("reviewModal").classList.remove("hidden");
+}
+
+function closeModal(){
+  document.getElementById("reviewModal").classList.add("hidden");
+}
+
+async function submitReview(){
+
+  const rating = document.getElementById("ratingInput").value;
+  const comment = document.getElementById("commentInput").value;
+
+  if(!rating || !comment){
+    alert("Fill all fields");
+    return;
+  }
+
+  await fetch("/add_review",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      worker_id:selectedWorkerId,
+      job_id:selectedJobId,
+      rating,
+      comment
+    })
+  });
+
+  alert("Review submitted");
+  closeModal();
+}
+
+async function payNow(id){
+
+  await fetch("/pay_transaction",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({transaction_id:id})
+  });
+
+  alert("Payment done");
+  loadTransactions();
+}
+
+loadTransactions();
+
+</script>
+
 </body>
 </html>
