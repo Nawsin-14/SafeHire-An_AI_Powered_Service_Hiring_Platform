@@ -1,6 +1,6 @@
 from flask import jsonify, render_template, redirect, request, session
 from support.app import app
-from support.models import db, Worker, Job, HireTransaction, User
+from support.models import db, Worker, Job, HireTransaction, User, Review
 from support.services.matching import calculate_match_score
 
 
@@ -106,16 +106,19 @@ def worker_dashboard():
 
     worker = Worker.query.filter_by(user_id=session["user_id"]).first()
     assigned_jobs = []
+    reviews = []
 
     if worker:
         assigned_jobs = Job.query.filter_by(assigned_worker_id=worker.id).all()
+        reviews = Review.query.filter_by(worker_id=worker.id).all()
 
     return render_template(
         "worker_dashboard.html",
         username=session.get("username"),
         role=session.get("role"),
         worker=worker,
-        assigned_jobs=assigned_jobs
+        assigned_jobs=assigned_jobs,
+        reviews=reviews
     )
 
 
@@ -133,6 +136,16 @@ def add_worker_page():
         role=session.get("role")
     )
 
+@app.route("/create-admin")
+def create_admin():
+    admin = User(
+        username="admin",
+        password="123",
+        role="admin"
+    )
+    db.session.add(admin)
+    db.session.commit()
+    return "Admin created!"
 
 @app.route("/admin-workers")
 def admin_workers_page():
