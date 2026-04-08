@@ -13,13 +13,13 @@ def has_role(*roles):
     return session.get("role") in roles
 
 
-@app.route("/")
-def home():
-    return render_template(
-        "index.html",
-        username=session.get("username"),
-        role=session.get("role")
-    )
+@app.route('/') 
+
+def home(): 
+
+    role = session.get('role')   
+
+    return render_template('index.html', role=role)
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
