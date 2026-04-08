@@ -139,6 +139,11 @@ def add_worker_page():
 
 @app.route("/create-admin")
 def create_admin():
+    existing_admin = User.query.filter_by(username="admin").first()
+
+    if existing_admin:
+        return "Admin already exists!"
+
     admin = User(
         username="admin",
         password="123",
@@ -231,7 +236,6 @@ def pay_transaction():
     if transaction.status == "completed":
         return jsonify({"error": "Already paid"}), 400
 
-    # ✅ Update status
     transaction.status = "completed"
 
     db.session.commit()
