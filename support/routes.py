@@ -13,13 +13,11 @@ def has_role(*roles):
     return session.get("role") in roles
 
 
-@app.route('/') 
-
-def home(): 
-
+@app.route('/')
+def home():
     role = session.get('role')   
-
     return render_template('index.html', role=role)
+
 
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
@@ -49,6 +47,7 @@ def signup():
 
     return jsonify({"message": "Signup successful!!!"}), 201
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "GET":
@@ -63,17 +62,18 @@ def login():
 
     if not user or user.password != password:
         return jsonify({"error": "Invalid credentials"}), 401
+
     session["user_id"] = user.id
     session["username"] = user.username
     session["role"] = user.role
 
     return jsonify({
-     "message": "Login successful!!!",
-     "role": user.role,
-     "redirect": "/admin-dashboard" if user.role == "admin"
-        else "/worker-dashboard" if user.role == "worker"
-        else "/jobs"
-}), 200
+        "message": "Login successful!!!",
+        "role": user.role,
+        "redirect": "/admin-dashboard" if user.role == "admin"
+            else "/worker-dashboard" if user.role == "worker"
+            else "/jobs"
+    }), 200
 
 
 @app.route("/logout")
@@ -123,20 +123,6 @@ def worker_dashboard():
     )
 
 
-@app.route("/add-worker")
-def add_worker_page():
-    if not is_logged_in():
-        return redirect("/login")
-
-    if not has_role("worker"):
-        return redirect("/")
-
-    return render_template(
-        "worker_page.html",
-        username=session.get("username"),
-        role=session.get("role")
-    )
-
 @app.route("/create-admin")
 def create_admin():
     existing_admin = User.query.filter_by(username="admin").first()
@@ -152,6 +138,7 @@ def create_admin():
     db.session.add(admin)
     db.session.commit()
     return "Admin created!"
+
 
 @app.route("/admin-workers")
 def admin_workers_page():
@@ -182,20 +169,6 @@ def jobs_page():
         role=session.get("role")
     )
 
-@app.route("/post-job")
-def post_job_page():
-    if not is_logged_in():
-        return redirect("/login")
-
-    if not has_role("employer"):
-        return redirect("/")
-
-    return render_template(
-        "post_job.html",
-        username=session.get("username"),
-        role=session.get("role")
-    )
-
 
 @app.route("/transactions")
 def transactions_page():
@@ -210,6 +183,7 @@ def transactions_page():
         username=session.get("username"),
         role=session.get("role")
     )
+
 
 @app.route("/pay_transaction", methods=["POST"])
 def pay_transaction():
@@ -237,15 +211,33 @@ def pay_transaction():
         return jsonify({"error": "Already paid"}), 400
 
     transaction.status = "completed"
-
     db.session.commit()
 
     return jsonify({"message": "Payment successful"}), 200
 
-@app.route("/workers", methods=["GET"])
-def get_workers():
-    workers = Worker.query.all()
-    return jsonify([w.to_dict() for w in workers])
+
+@app.route("/admin-dashboard")
+def admin_dashboard():
+    if not is_logged_in():
+        return redirect("/login")
+
+    if not has_role("admin"):
+        return redirect("/")
+
+    total_workers = Worker.query.count()
+    total_employers = User.query.filter_by(role="employer").count()
+    total_jobs = Job.query.count()
+    total_transactions = HireTransaction.query.count()
+
+    return render_template(
+        "admin_dashboard.html",
+        username=session.get("username"),
+        role=session.get("role"),
+        total_workers=total_workers,
+        total_employers=total_employers,
+        total_jobs=total_jobs,
+        total_transactions=total_transactions
+    )
 
 
 @app.route("/add_worker", methods=["POST"])
@@ -302,340 +294,3 @@ def add_worker():
         "message": "Worker profile created successfully",
         "worker": new_worker.to_dict()
     }), 201
-
-
-@app.route("/verify_worker/<int:worker_id>", methods=["POST"])
-def verify_worker(worker_id):
-    if not is_logged_in():
-        return jsonify({"error": "Login required"}), 401
-
-    if not has_role("admin"):
-        return jsonify({"error": "Only admin can verify workers"}), 403
-
-    data = request.get_json(silent=True) or {}
-    status = (data.get("status") or "").strip()
-
-    if status not in ["Pending", "Verified", "Rejected"]:
-        return jsonify({"error": "Invalid status"}), 400
-
-    worker = Worker.query.get(worker_id)
-    if not worker:
-        return jsonify({"error": "Worker not found"}), 404
-
-    worker.verification_status = status
-    db.session.commit()
-
-    return jsonify({"message": "Worker verification updated successfully"}), 200
-
-
-@app.route("/jobs_api", methods=["GET"])
-def get_jobs():
-    if not is_logged_in():
-        return jsonify({"error": "Login required"}), 401
-
-    if has_role("admin"):
-        jobs = Job.query.all()
-    elif has_role("employer"):
-        jobs = Job.query.filter_by(employer_id=session["user_id"]).all()
-    else:
-        return jsonify({"error": "Unauthorized"}), 403
-
-    return jsonify([job.to_dict() for job in jobs])
-
-
-@app.route("/add_job", methods=["POST"])
-def add_job():
-    if not is_logged_in():
-        return jsonify({"error": "Login required"}), 401
-
-    if not has_role("employer"):
-        return jsonify({"error": "Only employers can post jobs"}), 403
-
-    data = request.get_json(silent=True) or {}
-
-    title = data.get("title", "").strip()
-    category = data.get("category", "").strip()
-    location = data.get("location", "").strip()
-    budget = data.get("budget")
-    description = data.get("description", "").strip()
-
-    if not all([title, category, location]) or budget in [None, ""]:
-        return jsonify({"error": "Missing required fields"}), 400
-
-    try:
-        budget = float(budget)
-    except (TypeError, ValueError):
-        return jsonify({"error": "Budget must be a number"}), 400
-
-    new_job = Job(
-        employer_id=session["user_id"],
-        title=title,
-        category=category,
-        location=location,
-        budget=budget,
-        description=description,
-        status="open",
-        assigned_worker_id=None
-    )
-
-    db.session.add(new_job)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Job added successfully",
-        "job": new_job.to_dict()
-    }), 201
-
-
-@app.route("/job_matches", methods=["GET"])
-def get_job_matches():
-    if not is_logged_in():
-        return jsonify({"error": "Login required"}), 401
-
-    if not has_role("employer", "admin"):
-        return jsonify({"error": "Unauthorized"}), 403
-
-    try:
-        if has_role("admin"):
-            jobs = Job.query.all()
-        else:
-            jobs = Job.query.filter_by(employer_id=session["user_id"]).all()
-
-        workers = Worker.query.all()
-        result = []
-
-        for job in jobs:
-            matched_workers = []
-
-            for worker in workers:
-                if (worker.verification_status or "").strip().lower() != "verified":
-                    continue
-
-                score = calculate_match_score(worker, job)
-
-                matched_workers.append({
-                    "worker_id": worker.id,
-                    "worker_name": worker.name,
-                    "skills": worker.skills,
-                    "risk_score": worker.risk_score,
-                    "verification_status": worker.verification_status,
-                    "rating": worker.rating,
-                    "experience": worker.experience,
-                    "score": score
-                })
-
-            matched_workers.sort(key=lambda x: x["score"], reverse=True)
-
-            result.append({
-                "job_id": job.id,
-                "job_title": job.title,
-                "job_category": job.category,
-                "job_location": job.location,
-                "budget": job.budget,
-                "status": job.status,
-                "top_matches": matched_workers[:3]
-            })
-
-        return jsonify(result), 200
-
-    except Exception as e:
-        return jsonify({
-            "error": str(e),
-            "type": type(e).__name__
-        }), 500
-
-@app.route("/hire", methods=["POST"])
-def hire_worker():
-    if not is_logged_in():
-        return jsonify({"error": "Login required"}), 401
-
-    if not has_role("employer"):
-        return jsonify({"error": "Only employers can hire workers"}), 403
-
-    data = request.get_json(silent=True) or {}
-
-    job_id = data.get("job_id")
-    worker_id = data.get("worker_id")
-
-    if not job_id or not worker_id:
-        return jsonify({"error": "Missing required fields"}), 400
-
-    worker = Worker.query.get(worker_id)
-    job = Job.query.get(job_id)
-
-    if not worker:
-        return jsonify({"error": "Worker not found"}), 404
-
-    if not job:
-        return jsonify({"error": "Job not found"}), 404
-
-    if job.employer_id != session["user_id"]:
-        return jsonify({"error": "You can only hire for your own jobs"}), 403
-
-    if worker.verification_status != "Verified":
-        return jsonify({"error": "Only verified workers can be hired"}), 400
-
-    if job.status != "open":
-        return jsonify({"error": "This job is not available"}), 400
-
-    job.status = "assigned"
-    job.assigned_worker_id = worker.id
-
-    transaction = HireTransaction(
-        employer_id=session["user_id"],
-        worker_id=worker.id,
-        job_id=job.id,
-        status="assigned",
-        amount=job.budget
-    )
-
-    db.session.add(transaction)
-    db.session.commit()
-
-    return jsonify({
-        "message": "Worker hired successfully",
-        "transaction": transaction.to_dict()
-    }), 201
-
-
-@app.route("/transactions_api", methods=["GET"])
-def get_transactions():
-    if not is_logged_in():
-        return jsonify({"error": "Login required"}), 401
-
-    if has_role("admin"):
-        transactions = HireTransaction.query.all()
-    elif has_role("employer"):
-        transactions = HireTransaction.query.filter_by(employer_id=session["user_id"]).all()
-    else:
-        return jsonify({"error": "Unauthorized"}), 403
-
-    result = []
-
-    for t in transactions:
-        worker = Worker.query.get(t.worker_id)
-        job = Job.query.get(t.job_id)
-        employer = User.query.get(t.employer_id)
-
-        result.append({
-            "id": t.id,
-            "employer_name": employer.username if employer else "Unknown",
-            "worker_name": worker.name if worker else "Unknown",
-            "job_title": job.title if job else "Unknown",
-            "location": job.location if job else "Unknown",
-            "amount": t.amount,
-            "status": t.status,
-            "created_at": t.created_at.strftime("%Y-%m-%d"),
-            "worker_id": t.worker_id,
-            "job_id": t.job_id,
-            "transaction_id": t.id
-        })
-
-    return jsonify(result)
-
-@app.route("/admin-dashboard")
-def admin_dashboard():
-    if not is_logged_in():
-        return redirect("/login")
-
-    if not has_role("admin"):
-        return redirect("/")
-
-    total_workers = Worker.query.count()
-    total_employers = User.query.filter_by(role="employer").count()
-    total_jobs = Job.query.count()
-    total_transactions = HireTransaction.query.count()
-
-    return render_template(
-        "admin_dashboard.html",
-        username=session.get("username"),
-        role=session.get("role"),
-        total_workers=total_workers,
-        total_employers=total_employers,
-        total_jobs=total_jobs,
-        total_transactions=total_transactions
-    )
-
-
-@app.route("/add_review", methods=["POST"])
-def add_review():
-    if not is_logged_in():
-        return jsonify({"error": "Login required"}), 401
-
-    if not has_role("employer"):
-        return jsonify({"error": "Only employers can review"}), 403
-
-    data = request.get_json(silent=True) or {}
-
-    worker_id = data.get("worker_id")
-    job_id = data.get("job_id")
-    rating = data.get("rating")
-    comment = (data.get("comment") or "").strip()
-
-    if not all([worker_id, job_id, rating, comment]):
-        return jsonify({"error": "Missing fields"}), 400
-
-    try:
-        worker_id = int(worker_id)
-        job_id = int(job_id)
-        rating = float(rating)
-    except (TypeError, ValueError):
-        return jsonify({"error": "Invalid input values"}), 400
-
-    if rating < 1 or rating > 5:
-        return jsonify({"error": "Rating must be between 1 and 5"}), 400
-
-    worker = Worker.query.get(worker_id)
-    if not worker:
-        return jsonify({"error": "Worker not found"}), 404
-
-    job = Job.query.get(job_id)
-    if not job:
-        return jsonify({"error": "Job not found"}), 404
-
-    if job.employer_id != session["user_id"]:
-        return jsonify({"error": "You can only review workers for your own jobs"}), 403
-
-    if job.assigned_worker_id != worker_id:
-        return jsonify({"error": "This worker was not assigned to this job"}), 400
-
-    transaction = HireTransaction.query.filter_by(
-        employer_id=session["user_id"],
-        worker_id=worker_id,
-        job_id=job_id
-    ).order_by(desc(HireTransaction.created_at)).first()
-
-    if not transaction:
-        return jsonify({"error": "No valid transaction found"}), 404
-
-    existing = Review.query.filter_by(transaction_id=transaction.id).first()
-    if existing:
-        return jsonify({"error": "Review already submitted"}), 400
-
-    review = Review(
-        employer_id=session["user_id"],
-        worker_id=worker_id,
-        transaction_id=transaction.id,
-        rating=rating,
-        comment=comment
-    )
-
-    db.session.add(review)
-
-    all_reviews = Review.query.filter_by(worker_id=worker_id).all()
-    total = sum(float(r.rating) for r in all_reviews) + float(rating)
-    count = len(all_reviews) + 1
-
-    worker.rating = round(total / count, 2)
-
-    db.session.commit()
-
-    return jsonify({
-        "message": "Review added successfully",
-        "worker_rating": worker.rating
-    }), 201
-
-@app.route("/get_reviews/<int:worker_id>")
-def get_reviews(worker_id):
-    reviews = Review.query.filter_by(worker_id=worker_id).all()
-    return jsonify([r.to_dict() for r in reviews])
