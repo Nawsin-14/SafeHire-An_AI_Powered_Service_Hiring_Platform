@@ -104,10 +104,6 @@
 
      <nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full"> 
 
-       <a class="hover:text-white" href="/">Home</a> 
-
-  
-
        {% if username %} 
 
        {% if role == "admin" %} 
@@ -204,7 +200,7 @@
 
             Open Dashboard 
 
-            <span class="ml-3 text-xl">→</span> 
+            <span class="ml-3 text-xl"></span> 
 
           </a> 
 
@@ -384,7 +380,7 @@
 
       if (userRole === 'admin') { 
 
-        window.location.href = '/admin_dashboard';   
+        window.location.href = '/admin-dashboard';   
 
       } else if (userRole === 'employer') { 
 
@@ -392,7 +388,7 @@
 
       } else if (userRole === 'worker') { 
 
-        window.location.href = '/worker_dashboard';   
+        window.location.href = '/worker-dashboard';   
 
       } else { 
 
