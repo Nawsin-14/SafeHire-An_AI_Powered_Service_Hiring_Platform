@@ -91,8 +91,11 @@
 
     async function loadJobs() {
       try {
-        const res = await fetch("/job_matches");
+        const res = await fetch("/job_matches", {
+          credentials: "include"
+        });
         const jobs = await res.json();
+        console.log(jobs);
 
         const container = document.getElementById("jobsContainer");
         container.innerHTML = "";
