@@ -15,8 +15,19 @@ def has_role(*roles):
 
 @app.route('/')
 def home():
-    role = session.get('role')   
-    return render_template('index.html', role=role)
+    role = session.get("role")
+    username = session.get("username")
+
+    total_workers = Worker.query.count()
+    total_jobs = Job.query.count()
+
+    return render_template(
+        "index.html",
+        role=role,
+        username=username,
+        total_workers=total_workers,
+        total_jobs=total_jobs
+    )
 
 
 @app.route("/signup", methods=["GET", "POST"])
