@@ -36,7 +36,7 @@
 
 
 
-    <div class="flex gap-4">
+    <div class="flex gap-4 ml-auto">
 
       <a href="/transactions"
          class="bg-blue-500 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90">
@@ -128,7 +128,7 @@
         if (!Array.isArray(jobs) || jobs.length === 0) {
           container.innerHTML = `
             <div class="col-span-full bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 text-white/70">
-              No jobs found.
+              No jobs found
             </div>
           `;
           return;
