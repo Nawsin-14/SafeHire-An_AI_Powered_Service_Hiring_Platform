@@ -357,12 +357,15 @@ def job_matches():
     if not is_logged_in():
         return jsonify({"error": "Login required"}), 401
 
-    if not has_role("employer"):
+    if not has_role("employer", "admin"):
         return jsonify({"error": "Unauthorized"}), 403
 
-    jobs = Job.query.filter_by(employer_id=session["user_id"]).all()
-    workers = Worker.query.all()
+    if has_role("admin"):
+        jobs = Job.query.all()
+    else:
+        jobs = Job.query.filter_by(employer_id=session["user_id"]).all()
 
+    workers = Worker.query.all()
     result = []
 
     for job in jobs:
@@ -463,3 +466,38 @@ def transactions_page():
         username=session["username"],
         role=session["role"]
     )
+
+@app.route("/transactions_api", methods=["GET"])
+def get_transactions():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if has_role("admin"):
+        transactions = HireTransaction.query.all()
+    elif has_role("employer"):
+        transactions = HireTransaction.query.filter_by(employer_id=session["user_id"]).all()
+    else:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    result = []
+
+    for t in transactions:
+        worker = Worker.query.get(t.worker_id)
+        job = Job.query.get(t.job_id)
+        employer = User.query.get(t.employer_id)
+
+        result.append({
+            "id": t.id,
+            "employer_name": employer.username if employer else "Unknown",
+            "worker_name": worker.name if worker else "Unknown",
+            "job_title": job.title if job else "Unknown",
+            "location": job.location if job else "Unknown",
+            "amount": t.amount,
+            "status": t.status,
+            "created_at": t.created_at.strftime("%Y-%m-%d") if t.created_at else "",
+            "worker_id": t.worker_id,
+            "job_id": t.job_id,
+            "transaction_id": t.id
+        })
+
+    return jsonify(result), 200
