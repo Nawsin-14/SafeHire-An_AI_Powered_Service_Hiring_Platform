@@ -13,7 +13,7 @@ def has_role(*roles):
     return session.get("role") in roles
 
 
-@app.route('/')
+@app.route("/")
 def home():
     role = session.get("role")
     username = session.get("username")
@@ -48,7 +48,6 @@ def signup():
         return jsonify({"error": "Username already exists"}), 400
 
     user = User(username=username, password=password, role=role)
-
     db.session.add(user)
     db.session.commit()
 
@@ -80,7 +79,7 @@ def login():
         "redirect": "/admin-dashboard" if user.role == "admin"
         else "/worker-dashboard" if user.role == "worker"
         else "/jobs"
-    })
+    }), 200
 
 
 @app.route("/logout")
@@ -113,7 +112,6 @@ def worker_dashboard():
         return redirect("/")
 
     worker = Worker.query.filter_by(user_id=session["user_id"]).first()
-
     assigned_jobs = []
     reviews = []
 
@@ -129,6 +127,77 @@ def worker_dashboard():
         assigned_jobs=assigned_jobs,
         reviews=reviews
     )
+
+
+@app.route("/add-worker")
+def add_worker_page():
+    if not is_logged_in():
+        return redirect("/login")
+
+    if not has_role("worker"):
+        return redirect("/")
+
+    return render_template(
+        "worker_page.html",
+        username=session.get("username"),
+        role=session.get("role")
+    )
+
+
+@app.route("/add_worker", methods=["POST"])
+def add_worker():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("worker"):
+        return jsonify({"error": "Only worker accounts can create worker profiles"}), 403
+
+    data = request.get_json(silent=True) or {}
+
+    name = data.get("name", "").strip()
+    nid = data.get("nid", "").strip()
+    phone = data.get("phone", "").strip()
+    address = data.get("address", "").strip()
+    skills = data.get("skills", "").strip()
+    experience = data.get("experience", 0)
+
+    if not all([name, nid, phone, address, skills]):
+        return jsonify({"error": "Missing required fields"}), 400
+
+    if Worker.query.filter_by(nid=nid).first():
+        return jsonify({"error": "Worker with this NID already exists"}), 400
+
+    existing_worker = Worker.query.filter_by(user_id=session["user_id"]).first()
+    if existing_worker:
+        return jsonify({"error": "This account already has a worker profile"}), 400
+
+    try:
+        experience = int(experience)
+    except (TypeError, ValueError):
+        experience = 0
+
+    risk_score = len([s for s in skills.split(",") if s.strip()]) * 10
+
+    new_worker = Worker(
+        user_id=session["user_id"],
+        name=name,
+        nid=nid,
+        phone=phone,
+        address=address,
+        skills=skills,
+        risk_score=risk_score,
+        verification_status="Pending",
+        experience=experience,
+        rating=0.0
+    )
+
+    db.session.add(new_worker)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Worker profile created successfully",
+        "worker": new_worker.to_dict()
+    }), 201
 
 
 @app.route("/create-admin")
@@ -202,18 +271,26 @@ def add_job():
 
     data = request.get_json(silent=True) or {}
 
-    title = data.get("title")
-    category = data.get("category")
-    location = data.get("location")
+    title = (data.get("title") or "").strip()
+    category = (data.get("category") or "").strip()
+    location = (data.get("location") or "").strip()
     budget = data.get("budget")
-    description = data.get("description")
+    description = (data.get("description") or "").strip()
+
+    if not all([title, category, location]) or budget in [None, ""]:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    try:
+        budget = float(budget)
+    except (TypeError, ValueError):
+        return jsonify({"error": "Budget must be a number"}), 400
 
     new_job = Job(
         employer_id=session["user_id"],
         title=title,
         category=category,
         location=location,
-        budget=float(budget),
+        budget=budget,
         description=description,
         status="open"
     )
@@ -241,7 +318,7 @@ def job_matches():
         matches = []
 
         for worker in workers:
-            if worker.verification_status != "Verified":
+            if (worker.verification_status or "").strip().lower() != "verified":
                 continue
 
             score = calculate_match_score(worker, job)
@@ -267,20 +344,42 @@ def job_matches():
             "top_matches": matches[:3]
         })
 
-    return jsonify(result)
+    return jsonify(result), 200
 
 
 @app.route("/hire", methods=["POST"])
 def hire():
-    data = request.get_json()
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("employer"):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.get_json(silent=True) or {}
 
     job_id = data.get("job_id")
     worker_id = data.get("worker_id")
 
+    if not job_id or not worker_id:
+        return jsonify({"error": "Missing required fields"}), 400
+
     job = Job.query.get(job_id)
+    worker = Worker.query.get(worker_id)
 
     if not job:
         return jsonify({"error": "Job not found"}), 404
+
+    if not worker:
+        return jsonify({"error": "Worker not found"}), 404
+
+    if job.employer_id != session["user_id"]:
+        return jsonify({"error": "You can only hire for your own jobs"}), 403
+
+    if (job.status or "").lower() != "open":
+        return jsonify({"error": "This job is already assigned"}), 400
+
+    if (worker.verification_status or "").strip().lower() != "verified":
+        return jsonify({"error": "Only verified workers can be hired"}), 400
 
     job.status = "assigned"
     job.assigned_worker_id = worker_id
@@ -303,6 +402,9 @@ def hire():
 def transactions_page():
     if not is_logged_in():
         return redirect("/login")
+
+    if not has_role("admin", "employer"):
+        return redirect("/")
 
     return render_template(
         "transactions.html",
