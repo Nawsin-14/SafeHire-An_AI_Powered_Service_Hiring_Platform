@@ -199,6 +199,7 @@ def add_worker():
         "worker": new_worker.to_dict()
     }), 201
 
+
 @app.route("/workers", methods=["GET"])
 def get_workers():
     if not is_logged_in():
@@ -209,6 +210,31 @@ def get_workers():
 
     workers = Worker.query.all()
     return jsonify([w.to_dict() for w in workers]), 200
+
+
+@app.route("/verify_worker/<int:worker_id>", methods=["POST"])
+def verify_worker(worker_id):
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("admin"):
+        return jsonify({"error": "Only admin can verify workers"}), 403
+
+    data = request.get_json(silent=True) or {}
+    status = (data.get("status") or "").strip()
+
+    if status not in ["Pending", "Verified", "Rejected"]:
+        return jsonify({"error": "Invalid status"}), 400
+
+    worker = Worker.query.get(worker_id)
+    if not worker:
+        return jsonify({"error": "Worker not found"}), 404
+
+    worker.verification_status = status
+    db.session.commit()
+
+    return jsonify({"message": "Worker verification updated successfully"}), 200
+
 
 @app.route("/create-admin")
 def create_admin():
@@ -238,6 +264,21 @@ def admin_dashboard():
         total_employers=User.query.filter_by(role="employer").count(),
         total_jobs=Job.query.count(),
         total_transactions=HireTransaction.query.count()
+    )
+
+
+@app.route("/admin-workers")
+def admin_workers_page():
+    if not is_logged_in():
+        return redirect("/login")
+
+    if not has_role("admin"):
+        return redirect("/")
+
+    return render_template(
+        "admin_workers.html",
+        username=session.get("username"),
+        role=session.get("role")
     )
 
 
@@ -408,19 +449,6 @@ def hire():
 
     return jsonify({"message": "Worker hired successfully"}), 201
 
-@app.route("/admin-workers")
-def admin_workers_page():
-    if not is_logged_in():
-        return redirect("/login")
-
-    if not has_role("admin"):
-        return redirect("/")
-
-    return render_template(
-        "admin_workers.html",
-        username=session.get("username"),
-        role=session.get("role")
-    )
 
 @app.route("/transactions")
 def transactions_page():
