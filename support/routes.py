@@ -398,6 +398,19 @@ def hire():
 
     return jsonify({"message": "Worker hired successfully"}), 201
 
+@app.route("/admin-workers")
+def admin_workers_page():
+    if not is_logged_in():
+        return redirect("/login")
+
+    if not has_role("admin"):
+        return redirect("/")
+
+    return render_template(
+        "admin_workers.html",
+        username=session.get("username"),
+        role=session.get("role")
+    )
 
 @app.route("/transactions")
 def transactions_page():
