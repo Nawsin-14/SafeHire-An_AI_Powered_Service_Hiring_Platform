@@ -199,6 +199,16 @@ def add_worker():
         "worker": new_worker.to_dict()
     }), 201
 
+@app.route("/workers", methods=["GET"])
+def get_workers():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("admin"):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    workers = Worker.query.all()
+    return jsonify([w.to_dict() for w in workers]), 200
 
 @app.route("/create-admin")
 def create_admin():
