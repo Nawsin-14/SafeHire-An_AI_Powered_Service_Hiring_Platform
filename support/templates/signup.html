@@ -69,7 +69,7 @@
             const msg = document.getElementById("msg");
 
             if (res.ok) {
-                msg.innerHTML = "<span class='text-white-400'>Signup successful! Redirecting...</span>";
+msg.innerHTML = '<span class="text-white">Signup successful! Redirecting...</span>';
                 setTimeout(() => window.location.href = "/login", 1200);
             } else {
                 msg.innerHTML = `<span class='text-red-400'>${data.error}</span>`;
