@@ -323,14 +323,15 @@ def job_matches():
 
             score = calculate_match_score(worker, job)
 
-            matches.append({
-                "worker_id": worker.id,
-                "worker_name": worker.name,
-                "skills": worker.skills,
-                "rating": worker.rating,
-                "experience": worker.experience,
-                "score": score
-            })
+            if score > 0:
+                matches.append({
+                    "worker_id": worker.id,
+                    "worker_name": worker.name,
+                    "skills": worker.skills,
+                    "rating": worker.rating,
+                    "experience": worker.experience,
+                    "score": score
+                })
 
         matches.sort(key=lambda x: x["score"], reverse=True)
 
