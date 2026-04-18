@@ -209,7 +209,7 @@ function getStatusBadge(status) {
 
 function getActionButtons(t) {
   if (ROLE === "admin") {
-    return `<span class="text-amber-300 text-xs font-medium">Read Only</span>`;
+    return ""; 
   }
 
   const s = (t.status || "").toLowerCase();
