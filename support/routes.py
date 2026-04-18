@@ -540,6 +540,36 @@ def jobs_page():
     )
 
 
+@app.route("/jobs_api", methods=["GET"])
+def jobs_api():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("employer", "admin"):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    if has_role("admin"):
+        jobs = Job.query.order_by(Job.id.desc()).all()
+    else:
+        jobs = Job.query.filter_by(employer_id=session["user_id"]).order_by(Job.id.desc()).all()
+
+    result = []
+    for job in jobs:
+        result.append({
+            "id": job.id,
+            "title": job.title,
+            "category": job.category,
+            "location": job.location,
+            "budget": job.budget,
+            "description": job.description,
+            "status": job.status,
+            "assigned_worker_id": job.assigned_worker_id,
+            "employer_id": job.employer_id
+        })
+
+    return jsonify(result), 200
+
+
 @app.route("/post-job")
 def post_job_page():
     if not is_logged_in():
@@ -612,9 +642,9 @@ def job_matches():
         return jsonify({"error": "Unauthorized"}), 403
 
     if has_role("admin"):
-        jobs = Job.query.all()
+        jobs = Job.query.order_by(Job.id.desc()).all()
     else:
-        jobs = Job.query.filter_by(employer_id=session["user_id"]).all()
+        jobs = Job.query.filter_by(employer_id=session["user_id"]).order_by(Job.id.desc()).all()
 
     workers = Worker.query.all()
     result = []

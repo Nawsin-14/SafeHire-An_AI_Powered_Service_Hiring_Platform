@@ -1,183 +1,254 @@
-const jobList = document.getElementById("jobList");
-const jobForm = document.getElementById("jobForm");
-const hireForm = document.getElementById("hireForm");
+const jobsContainer = document.getElementById("jobsContainer");
+const role = window.SAFEHIRE_ROLE || "employer";
 
-function getStatusPillClass(status) {
-  if (status === "assigned") {
-    return "bg-amber-500/20 text-amber-300 border border-amber-400/20";
+const modal = document.getElementById("messageModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalMessage = document.getElementById("modalMessage");
+const modalIcon = document.getElementById("modalIcon");
+const modalOkBtn = document.getElementById("modalOkBtn");
+
+function showModal(type, message) {
+  if (type === "success") {
+    modalTitle.textContent = "Success";
+    modalMessage.textContent = message || "Action completed successfully.";
+    modalIcon.textContent = "✓";
+    modalIcon.className =
+      "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30";
+  } else {
+    modalTitle.textContent = "Error";
+    modalMessage.textContent = message || "Something went wrong.";
+    modalIcon.textContent = "!";
+    modalIcon.className =
+      "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30";
   }
-  if (status === "completed") {
-    return "bg-emerald-500/20 text-emerald-300 border border-emerald-400/20";
-  }
-  return "bg-pink-500/20 text-pink-300 border border-pink-400/20";
+
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
 }
 
-function getStatusLabel(status) {
-  if (status === "assigned") return "Assigned";
-  if (status === "completed") return "Completed";
-  return "Open";
+function closeModal() {
+  modal.classList.remove("flex");
+  modal.classList.add("hidden");
 }
 
-function renderJobs(jobs, matchMap = {}) {
-  jobList.innerHTML = "";
+modalOkBtn.addEventListener("click", closeModal);
 
-  if (!Array.isArray(jobs) || jobs.length === 0) {
-    jobList.innerHTML = `
-      <div class="sm:col-span-2 text-center py-10">
-        <p class="text-white font-medium">No jobs posted yet.</p>
-        <p class="text-sm text-gray-300 mt-1">Post a job to see it listed here.</p>
-      </div>
+modal.addEventListener("click", function (e) {
+  if (e.target === modal) {
+    closeModal();
+  }
+});
+
+function getJobStatusBadge(status) {
+  const value = (status || "").toLowerCase();
+
+  if (value === "open") {
+    return `
+      <span class="text-sm px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300">
+        Open
+      </span>
     `;
-    return;
   }
 
-  jobs.forEach((job) => {
-    const match = matchMap[job.id];
-    const hasMatch = match && match.worker_id;
+  if (value === "assigned") {
+    return `
+      <span class="text-sm px-3 py-1 rounded-full bg-pink-500/20 text-pink-300">
+        Assigned
+      </span>
+    `;
+  }
 
-    jobList.innerHTML += `
-      <div class="bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur transition hover:bg-white/10 hover:shadow-xl">
-        <div class="flex items-start justify-between gap-3">
+  if (value === "completed") {
+    return `
+      <span class="text-sm px-3 py-1 rounded-full bg-blue-500/20 text-blue-300">
+        Completed
+      </span>
+    `;
+  }
+
+  return `
+    <span class="text-sm px-3 py-1 rounded-full bg-white/10 text-white/80">
+      ${status || "Unknown"}
+    </span>
+  `;
+}
+
+function renderRating(rating) {
+  const value = Number(rating ?? 0).toFixed(1);
+  return `<span class="text-yellow-300 font-semibold">⭐ ${value}</span>`;
+}
+
+function getEmployerViewCard(job, workers) {
+  const workerHTML = workers.length
+    ? workers.map((w) => `
+      <div class="bg-white/10 p-4 rounded-xl border border-white/10">
+        <div class="flex justify-between items-start gap-3">
           <div>
-            <p class="font-semibold leading-5 text-white">${job.title}</p>
-            <p class="text-sm text-gray-300 mt-1">${job.category} • ${job.location}</p>
+            <p class="font-semibold text-lg">${w.worker_name}</p>
+            <p class="text-sm text-gray-300 mt-1">${w.skills}</p>
+            <p class="text-sm text-white/70 mt-1">Experience: ${w.experience ?? 0} years</p>
+            <p class="text-sm mt-1">${renderRating(w.rating)}</p>
           </div>
 
-          <span class="px-3 py-1 rounded-full text-xs font-medium ${getStatusPillClass(job.status)}">
-            ${getStatusLabel(job.status)}
-          </span>
-        </div>
-
-        <p class="text-sm text-gray-300 mt-4">${job.description || "No description provided."}</p>
-        <div class="mt-4 p-4 rounded-2xl bg-purple-500/10 border border-purple-400/20">
-          <div class="flex items-center justify-between gap-2">
-            <p class="text-xs font-semibold text-purple-200 uppercase tracking-wide">AI Match Recommendation</p>
-            ${
-              hasMatch
-                ? `<span class="px-2 py-1 rounded-full text-[10px] font-semibold bg-purple-500/20 text-purple-200 border border-purple-400/20">Best Match</span>`
-                : ""
-            }
+          <div class="text-right">
+            <p class="text-pink-400 font-bold text-lg">${w.score}</p>
+            <p class="text-xs text-white/60">Match Score</p>
           </div>
-
-
-          <p class="text-sm text-white mt-2">
-            ${hasMatch ? match.matched_worker : "No suitable worker found"}
-          </p>
-
-          ${
-            hasMatch
-              ? `
-                <p class="text-xs text-gray-300 mt-1">Worker ID: ${match.worker_id}</p>
-                <p class="text-xs text-gray-300 mt-1">Match Score: ${match.score}/100</p>
-              `
-              : `<p class="text-xs text-gray-400 mt-1">No verified worker matched this job yet.</p>`
-          }
         </div>
 
-        <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
-          <p class="text-sm font-medium text-white">Budget: ৳${job.budget}</p>
-          <p class="text-xs text-gray-300">Job ID: ${job.id}</p>
-        </div>
+        ${
+          (job.status || "").toLowerCase() === "open"
+            ? `
+              <button
+                onclick="hire(${job.job_id}, ${w.worker_id})"
+                class="mt-3 w-full bg-green-500 py-2 rounded-lg text-sm font-semibold hover:opacity-90">
+                Hire
+              </button>
+            `
+            : `
+              <button
+                disabled
+                class="mt-3 w-full bg-gray-500 py-2 rounded-lg text-sm font-semibold cursor-not-allowed opacity-70">
+                Already Assigned
+              </button>
+            `
+        }
       </div>
-    `;
-  });
+    `).join("")
+    : `<p class="text-gray-400 text-sm">No match found</p>`;
+
+  return `
+    <div class="bg-white/10 backdrop-blur p-5 rounded-2xl border border-white/10 shadow-lg">
+      <div class="flex justify-between items-start gap-4">
+        <div>
+          <h3 class="text-xl font-bold">${job.job_title}</h3>
+          <p class="text-sm text-gray-300">${job.job_category} • ${job.job_location}</p>
+        </div>
+        ${getJobStatusBadge(job.status)}
+      </div>
+
+      <p class="mt-3 text-lg font-semibold">BDT ${job.budget}</p>
+
+      <div class="mt-4 space-y-3">
+        ${workerHTML}
+      </div>
+    </div>
+  `;
+}
+
+function getAdminViewCard(job) {
+  return `
+    <div class="bg-white/10 backdrop-blur p-5 rounded-2xl border border-white/10 shadow-lg">
+      <div class="flex justify-between items-start gap-4">
+        <div>
+          <h3 class="text-xl font-bold">${job.title}</h3>
+          <p class="text-sm text-gray-300">${job.category} • ${job.location}</p>
+        </div>
+        ${getJobStatusBadge(job.status)}
+      </div>
+
+      <p class="mt-3 text-lg font-semibold">BDT ${job.budget}</p>
+
+      <p class="mt-4 text-sm text-white/80">
+        ${job.description ? job.description : "No description provided."}
+      </p>
+
+      <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
+        <p class="text-xs text-gray-300">Job ID: ${job.id}</p>
+        <p class="text-xs text-amber-300 font-medium">Read Only</p>
+      </div>
+    </div>
+  `;
 }
 
 async function loadJobs() {
   try {
-    const [jobsResponse, matchesResponse] = await Promise.all([
-      fetch("/jobs_api"),
-      fetch("/job_matches")
-    ]);
+    jobsContainer.innerHTML = `
+      <div class="col-span-full bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 text-white/70">
+        Loading jobs...
+      </div>
+    `;
 
-    if (!jobsResponse.ok) throw new Error(`Jobs HTTP ${jobsResponse.status}`);
-    if (!matchesResponse.ok) throw new Error(`Matches HTTP ${matchesResponse.status}`);
+    if (role === "admin") {
+      const res = await fetch("/jobs_api", { credentials: "include" });
+      const jobs = await res.json();
 
-    const jobs = await jobsResponse.json();
-    const matches = await matchesResponse.json();
+      if (!res.ok) {
+        throw new Error(jobs.error || "Failed to load jobs");
+      }
 
-    const matchMap = {};
-    matches.forEach((m) => {
-      matchMap[m.job_id] = m;
-    });
+      if (!Array.isArray(jobs) || jobs.length === 0) {
+        jobsContainer.innerHTML = `
+          <div class="col-span-full bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 text-white/70">
+            No jobs found.
+          </div>
+        `;
+        return;
+      }
 
-    renderJobs(jobs, matchMap);
+      jobsContainer.innerHTML = jobs.map((job) => getAdminViewCard(job)).join("");
+      return;
+    }
+
+    const res = await fetch("/job_matches", { credentials: "include" });
+    const jobs = await res.json();
+
+    if (!res.ok) {
+      throw new Error(jobs.error || "Failed to load jobs");
+    }
+
+    if (!Array.isArray(jobs) || jobs.length === 0) {
+      jobsContainer.innerHTML = `
+        <div class="col-span-full bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 text-white/70">
+          No jobs found.
+        </div>
+      `;
+      return;
+    }
+
+    jobsContainer.innerHTML = jobs
+      .map((job) => getEmployerViewCard(job, job.top_matches || []))
+      .join("");
+
   } catch (error) {
-    console.error("Error loading jobs:", error);
-    jobList.innerHTML = `
-      <div class="sm:col-span-2 text-center py-10">
-        <p class="text-rose-300 font-medium">Could not load jobs.</p>
+    console.error(error);
+    jobsContainer.innerHTML = `
+      <div class="col-span-full bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 text-red-300">
+        Failed to load jobs.
       </div>
     `;
   }
 }
 
-jobForm.addEventListener("submit", async function (e) {
-  e.preventDefault();
-
-  const formData = {
-    title: this.title.value.trim(),
-    category: this.category.value.trim(),
-    location: this.location.value.trim(),
-    budget: this.budget.value.trim(),
-    description: this.description.value.trim()
-  };
+async function hire(jobId, workerId) {
+  if (role === "admin") {
+    showModal("error", "Admin cannot hire workers.");
+    return;
+  }
 
   try {
-    const response = await fetch("/add_job", {
+    const res = await fetch("/hire", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(formData)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ job_id: jobId, worker_id: workerId })
     });
 
-    const data = await response.json();
+    const data = await res.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to post job");
+    if (!res.ok) {
+      showModal("error", data.error || "Failed to hire worker");
+      return;
     }
 
-    alert(data.message || "Job posted successfully");
-    this.reset();
+    showModal("success", data.message || "Worker hired successfully");
     loadJobs();
+
   } catch (error) {
-    console.error("Error posting job:", error);
-    alert(error.message || "Could not post job");
+    console.error(error);
+    showModal("error", "Something went wrong");
   }
-});
+}
 
-hireForm.addEventListener("submit", async function (e) {
-  e.preventDefault();
+window.hire = hire;
 
-  const formData = {
-    employer_name: this.employer_name.value.trim(),
-    job_id: this.job_id.value.trim(),
-    worker_id: this.worker_id.value.trim()
-  };
-
-  try {
-    const response = await fetch("/hire", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(formData)
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "Failed to hire worker");
-    }
-
-    alert(data.message || "Worker hired successfully");
-    this.reset();
-    loadJobs();
-  } catch (error) {
-    console.error("Error hiring worker:", error);
-    alert(error.message || "Could not hire worker");
-  }
-});
-
- loadJobs();
+loadJobs();
