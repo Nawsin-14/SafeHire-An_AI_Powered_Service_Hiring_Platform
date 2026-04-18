@@ -24,14 +24,24 @@
 <body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
 
 <header class="bg-white/10 backdrop-blur border-b border-white/10">
-  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-    <h1 class="text-2xl font-extrabold">SafeHire Transactions</h1>
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center gap-4">
+    <div class="flex items-center gap-3">
+      <img
+        src="/static/images/SafeHire_logo.png"
+        alt="SafeHire Logo"
+        class="h-12 w-12 rounded-full shadow-lg object-cover"
+      />
+      <div>
+        <h1 class="text-2xl font-extrabold">SafeHire</h1>
+        <p class="text-sm text-white/70">AI Powered Hiring Platform</p>
+      </div>
+    </div>
 
     <div class="flex gap-3">
-      <a href="/dashboard" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-semibold">
+      <a href="/dashboard" class="bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-semibold transition">
         Dashboard
       </a>
-      <a href="/logout" class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-lg text-sm font-semibold">
+      <a href="/logout" class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition">
         Logout
       </a>
     </div>
@@ -39,114 +49,185 @@
 </header>
 
 <main class="max-w-7xl mx-auto px-6 py-8">
-
   <div class="bg-white/10 backdrop-blur border border-white/10 rounded-2xl overflow-hidden">
-
-    <div class="px-6 py-5 border-b border-white/10 flex justify-between">
+    <div class="px-6 py-5 border-b border-white/10 flex justify-between items-center gap-4">
       <div>
         <h2 class="text-xl font-bold">All Transactions</h2>
-        <p class="text-sm text-white/70">Hiring & payments</p>
+        {% if role == "admin" %}
+          <p class="text-sm text-amber-300 mt-1">Admin View Only — no actions available on this page.</p>
+        {% else %}
+          <p class="text-sm text-white/70 mt-1">Hiring & payments</p>
+        {% endif %}
       </div>
 
       <button onclick="loadTransactions()"
-        class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-lg text-sm font-semibold">
+        class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition">
         Refresh
       </button>
     </div>
 
     <div id="loading" class="px-6 py-6 text-white/70">Loading...</div>
 
-    <table id="transactionsTable" class="min-w-full hidden">
-      <thead class="bg-white/10 text-white/70 text-sm">
-        <tr>
-          <th class="px-6 py-4">ID</th>
-          <th class="px-6 py-4">Employer</th>
-          <th class="px-6 py-4">Worker</th>
-          <th class="px-6 py-4">Job</th>
-          <th class="px-6 py-4 text-center">Amount</th>
-          <th class="px-6 py-4 text-center">Status</th>
-          <th class="px-6 py-4 text-center">Action</th>
-        </tr>
-      </thead>
+    <div class="overflow-x-auto">
+      <table id="transactionsTable" class="min-w-full hidden">
+        <thead class="bg-white/10 text-white/70 text-sm">
+          <tr>
+            <th class="px-6 py-4 text-left">ID</th>
+            <th class="px-6 py-4 text-left">Employer</th>
+            <th class="px-6 py-4 text-left">Worker</th>
+            <th class="px-6 py-4 text-left">Job</th>
+            <th class="px-6 py-4 text-center">Amount</th>
+            <th class="px-6 py-4 text-center">Status</th>
+            <th class="px-6 py-4 text-center">Action</th>
+          </tr>
+        </thead>
 
-      <tbody id="transactionsBody" class="divide-y divide-white/10"></tbody>
-    </table>
+        <tbody id="transactionsBody" class="divide-y divide-white/10"></tbody>
+      </table>
+    </div>
 
     <div id="emptyState" class="hidden px-6 py-10 text-center text-white/70">
       No transactions found
     </div>
-
   </div>
 </main>
 
-<div id="reviewModal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-
-  <div class="w-full max-w-md rounded-3xl border border-white/10 bg-gradient-to-br from-[#16112B] via-[#22123F] to-[#3B1364] p-6">
-
-    <div class="flex justify-between mb-4">
+<div id="reviewModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm items-center justify-center z-50 px-4">
+  <div class="w-full max-w-md rounded-3xl border border-white/10 bg-gradient-to-br from-[#16112B] via-[#22123F] to-[#3B1364] p-6 shadow-2xl">
+    <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-bold">Leave Review</h2>
-      <button onclick="closeModal()" class="text-white/60 hover:text-white text-xl">&times;</button>
+      <button onclick="closeReviewModal()" class="text-white/60 hover:text-white text-2xl leading-none">&times;</button>
     </div>
 
     <input id="ratingInput" type="number" min="1" max="5" step="0.1"
-      class="w-full mb-3 p-3 rounded-xl bg-white/10 border border-white/10"
+      class="w-full mb-3 p-3 rounded-xl bg-white/10 border border-white/10 outline-none"
       placeholder="Rating (1-5)">
 
     <textarea id="commentInput" rows="4"
-      class="w-full mb-4 p-3 rounded-xl bg-white/10 border border-white/10"
+      class="w-full mb-4 p-3 rounded-xl bg-white/10 border border-white/10 outline-none"
       placeholder="Write review"></textarea>
 
     <div class="grid grid-cols-2 gap-3">
       <button onclick="submitReview()"
-        class="bg-gradient-to-r from-pink-500 to-purple-600 py-2 rounded-xl">
+        class="bg-gradient-to-r from-pink-500 to-purple-600 py-2 rounded-xl font-semibold hover:opacity-90 transition">
         Submit
       </button>
 
-      <button onclick="closeModal()"
-        class="bg-white/10 py-2 rounded-xl">
+      <button onclick="closeReviewModal()"
+        class="bg-white/10 py-2 rounded-xl font-semibold hover:bg-white/20 transition">
         Cancel
       </button>
     </div>
+  </div>
+</div>
 
+<!-- SafeHire Message Modal -->
+<div id="messageModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
+  <div class="w-full max-w-md bg-gradient-to-br from-[#24124D] to-[#6B21A8] border border-white/10 rounded-3xl shadow-2xl p-6 text-white">
+    <div class="flex items-start gap-4">
+      <div id="modalIcon"
+           class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+        ✓
+      </div>
+
+      <div class="flex-1">
+        <h2 id="modalTitle" class="text-2xl font-bold mb-2">Success</h2>
+        <p id="modalMessage" class="text-white/80 leading-relaxed">
+          Action completed successfully.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <button id="modalOkBtn"
+              class="bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-2xl font-semibold transition">
+        OK
+      </button>
+    </div>
   </div>
 </div>
 
 <script>
-
+const ROLE = "{{ role }}";
 let selectedWorkerId = null;
 let selectedJobId = null;
 let selectedTransactionId = null;
 
-function getStatusBadge(status){
-  const s = (status||"").toLowerCase();
+const messageModal = document.getElementById("messageModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalMessage = document.getElementById("modalMessage");
+const modalIcon = document.getElementById("modalIcon");
+const modalOkBtn = document.getElementById("modalOkBtn");
 
-  if(s==="assigned"){
+function showMessageModal(type, message) {
+  if (type === "success") {
+    modalTitle.textContent = "Success";
+    modalMessage.textContent = message || "Action completed successfully.";
+    modalIcon.textContent = "✓";
+    modalIcon.className =
+      "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30";
+  } else {
+    modalTitle.textContent = "Error";
+    modalMessage.textContent = message || "Something went wrong.";
+    modalIcon.textContent = "!";
+    modalIcon.className =
+      "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30";
+  }
+
+  messageModal.classList.remove("hidden");
+  messageModal.classList.add("flex");
+}
+
+function closeMessageModal() {
+  messageModal.classList.remove("flex");
+  messageModal.classList.add("hidden");
+}
+
+modalOkBtn.addEventListener("click", closeMessageModal);
+
+messageModal.addEventListener("click", function (e) {
+  if (e.target === messageModal) {
+    closeMessageModal();
+  }
+});
+
+function getStatusBadge(status) {
+  const s = (status || "").toLowerCase();
+
+  if (s === "assigned") {
     return `<span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs">Assigned</span>`;
   }
 
-  if(s==="completed"){
+  if (s === "completed") {
     return `<span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 text-xs">Completed</span>`;
   }
 
-  return `<span class="px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-xs">${status}</span>`;
+  if (s === "cancelled") {
+    return `<span class="px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs">Cancelled</span>`;
+  }
+
+  return `<span class="px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-xs">${status || "Unknown"}</span>`;
 }
 
-function getActionButtons(t){
+function getActionButtons(t) {
+  if (ROLE === "admin") {
+    return `<span class="text-amber-300 text-xs font-medium">Read Only</span>`;
+  }
 
-  const s = (t.status||"").toLowerCase();
+  const s = (t.status || "").toLowerCase();
 
-  if(s==="assigned"){
+  if (s === "assigned") {
     return `
       <button onclick="payNow(${t.id})"
-      class="bg-green-500 px-3 py-2 rounded-lg text-xs font-semibold">
+      class="bg-green-500 px-3 py-2 rounded-lg text-xs font-semibold hover:opacity-90 transition">
       Pay Now
       </button>`;
   }
 
-  if(s==="completed"){
+  if (s === "completed") {
     return `
-      <button onclick="openReviewModal(${t.worker_id},${t.job_id},${t.id})"
-      class="bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-2 rounded-lg text-xs font-semibold">
+      <button onclick="openReviewModal(${t.worker_id}, ${t.job_id}, ${t.id})"
+      class="bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-2 rounded-lg text-xs font-semibold hover:opacity-90 transition">
       Review
       </button>`;
   }
@@ -154,8 +235,7 @@ function getActionButtons(t){
   return `<span class="text-white/40 text-xs">—</span>`;
 }
 
-async function loadTransactions(){
-
+async function loadTransactions() {
   const loading = document.getElementById("loading");
   const table = document.getElementById("transactionsTable");
   const body = document.getElementById("transactionsBody");
@@ -164,89 +244,146 @@ async function loadTransactions(){
   loading.classList.remove("hidden");
   table.classList.add("hidden");
   empty.classList.add("hidden");
-  body.innerHTML="";
+  body.innerHTML = "";
 
-  const res = await fetch("/transactions_api");
-  const data = await res.json();
+  try {
+    const res = await fetch("/transactions_api");
+    const data = await res.json();
 
-  loading.classList.add("hidden");
+    loading.classList.add("hidden");
 
-  if(!data.length){
+    if (!res.ok) {
+      throw new Error(data.error || "Failed to load transactions");
+    }
+
+    if (!Array.isArray(data) || data.length === 0) {
+      empty.classList.remove("hidden");
+      return;
+    }
+
+    table.classList.remove("hidden");
+
+    data.forEach((t) => {
+      body.innerHTML += `
+        <tr class="hover:bg-white/5">
+          <td class="px-6 py-4">${t.id}</td>
+          <td class="px-6 py-4">${t.employer_name}</td>
+          <td class="px-6 py-4">${t.worker_name}</td>
+          <td class="px-6 py-4">${t.job_title}</td>
+          <td class="px-6 py-4 text-center font-semibold text-white">
+            BDT ${Number(t.amount || 0).toLocaleString()}
+          </td>
+          <td class="px-6 py-4 text-center">${getStatusBadge(t.status)}</td>
+          <td class="px-6 py-4 text-center">${getActionButtons(t)}</td>
+        </tr>
+      `;
+    });
+
+  } catch (error) {
+    console.error(error);
+    loading.classList.add("hidden");
+    body.innerHTML = "";
     empty.classList.remove("hidden");
+    empty.textContent = "Could not load transactions.";
+  }
+}
+
+function openReviewModal(workerId, jobId, transactionId) {
+  if (ROLE === "admin") {
+    showMessageModal("error", "Admin cannot submit reviews.");
     return;
   }
 
-  table.classList.remove("hidden");
-
-  data.forEach(t=>{
-    body.innerHTML += `
-      <tr class="hover:bg-white/5">
-        <td class="px-6 py-4">${t.id}</td>
-        <td class="px-6 py-4">${t.employer_name}</td>
-        <td class="px-6 py-4">${t.worker_name}</td>
-        <td class="px-6 py-4">${t.job_title}</td>
-        <td class="px-6 py-4 text-center font-semibold text-white">
-         BDT ${Number(t.amount).toLocaleString()}
-        </td>
-        <td class="px-6 py-4 text-center">${getStatusBadge(t.status)}</td>
-        <td class="px-6 py-4 text-center">${getActionButtons(t)}</td>
-      </tr>
-    `;
-  });
-
-}
-
-function openReviewModal(w,j,t){
-  selectedWorkerId=w;
-  selectedJobId=j;
-  selectedTransactionId=t;
+  selectedWorkerId = workerId;
+  selectedJobId = jobId;
+  selectedTransactionId = transactionId;
 
   document.getElementById("reviewModal").classList.remove("hidden");
+  document.getElementById("reviewModal").classList.add("flex");
 }
 
-function closeModal(){
+function closeReviewModal() {
   document.getElementById("reviewModal").classList.add("hidden");
+  document.getElementById("reviewModal").classList.remove("flex");
 }
 
-async function submitReview(){
-
+async function submitReview() {
   const rating = document.getElementById("ratingInput").value;
   const comment = document.getElementById("commentInput").value;
 
-  if(!rating || !comment){
-    alert("Fill all fields");
+  if (!rating || !comment) {
+    showMessageModal("error", "Please fill all fields.");
     return;
   }
 
-  await fetch("/add_review",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      worker_id:selectedWorkerId,
-      job_id:selectedJobId,
-      rating,
-      comment
-    })
-  });
+  try {
+    const res = await fetch("/add_review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        worker_id: selectedWorkerId,
+        job_id: selectedJobId,
+        rating,
+        comment
+      })
+    });
 
-  alert("Review submitted");
-  closeModal();
+    const data = await res.json();
+
+    if (!res.ok) {
+      showMessageModal("error", data.error || "Failed to submit review.");
+      return;
+    }
+
+    closeReviewModal();
+    document.getElementById("ratingInput").value = "";
+    document.getElementById("commentInput").value = "";
+    showMessageModal("success", data.message || "Review submitted successfully.");
+  } catch (error) {
+    console.error(error);
+    showMessageModal("error", "Something went wrong while submitting the review.");
+  }
 }
 
-async function payNow(id){
+async function payNow(id) {
+  if (ROLE === "admin") {
+    showMessageModal("error", "Admin cannot make payments.");
+    return;
+  }
 
-  await fetch("/pay_transaction",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({transaction_id:id})
-  });
+  try {
+    let res = await fetch(`/complete-payment/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" }
+    });
 
-  alert("Payment done");
-  loadTransactions();
+    let data = await res.json().catch(() => null);
+
+    if (!res.ok) {
+      // fallback for older backend route if present
+      const fallbackRes = await fetch("/pay_transaction", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transaction_id: id })
+      });
+
+      data = await fallbackRes.json().catch(() => null);
+
+      if (!fallbackRes.ok) {
+        showMessageModal("error", (data && data.error) || "Payment failed.");
+        return;
+      }
+    }
+
+    showMessageModal("success", (data && data.message) || "Payment done.");
+    loadTransactions();
+  } catch (error) {
+    console.error(error);
+    showMessageModal("error", "Something went wrong while completing payment.");
+  }
 }
 
 loadTransactions();
-
 </script>
 
 </body>
