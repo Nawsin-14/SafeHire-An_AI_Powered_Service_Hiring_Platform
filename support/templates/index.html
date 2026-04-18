@@ -1,405 +1,173 @@
-<!DOCTYPE html> 
-
-<html lang="en"> 
-
-<head> 
-
-  <meta charset="UTF-8" /> 
-
-  <meta name="viewport" content="width=device-width, initial-scale=1" /> 
-
-  <title>SafeHire</title> 
-
-  
-
-  <link rel="preconnect" href="https://fonts.googleapis.com"> 
-
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"> 
-
-  
-
-  <script src="https://cdn.tailwindcss.com"></script> 
-
-  <script> 
-
-    tailwind.config = { 
-
-      theme: { 
-
-        extend: { 
-
-          fontFamily: { 
-
-            sans: ["Inter", "ui-sans-serif", "system-ui"] 
-
-          }, 
-
-          colors: { 
-
-            brand: { 
-
-              50: "#F5D0FE", 
-
-              100: "#F0ABFC", 
-
-              500: "#EC4899", 
-
-              600: "#DB2777", 
-
-              700: "#BE185D" 
-
-            } 
-
-          }, 
-
-          boxShadow: { 
-
-            glow: "0 0 40px rgba(236,72,153,0.25)" 
-
-          } 
-
-        } 
-
-      } 
-
-    } 
-
-  </script> 
-
-</head> 
-
-  
-
-<body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]"> 
-
-  <header class="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b border-white/10"> 
-
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3"> 
-
-      <div class="flex items-center gap-3"> 
-
-        <img  
-
-          src="/static/images/SafeHire_logo.png" 
-
-          alt="SafeHire Logo" 
-
-          class="h-12 w-12 rounded-full shadow-lg" 
-
-        /> 
-
-        <div> 
-
-          <p class="font-bold text-xl leading-5 text-white">SafeHire</p> 
-
-          <p class="text-xs text-gray-300 mt-1">AI Powered Service Hiring Platform</p> 
-
-        </div> 
-
-      </div> 
-
-  
-
-     <nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full"> 
-
-       {% if username %} 
-
-       {% if role == "admin" %} 
-
-       <a class="hover:text-white" href="/worker-dashboard">Workers</a> 
-
-       <a class="hover:text-white" href="/verify-workers">Verify</a> 
-
-       <a class="hover:text-white" href="/transactions">Transactions</a> 
-
-       {% elif role == "user" %} 
-
-       <a class="hover:text-white" href="/worker-dashboard">Workers</a> 
-
-       <a class="hover:text-white" href="/add-worker">Add Worker</a> 
-
-       <a class="hover:text-white" href="/jobs">Jobs</a> 
-
-       <a class="hover:text-white" href="/transactions">Transactions</a> 
-
-       {% endif %} 
-
-  
-
-       <div class="flex items-center gap-3 ml-auto"> 
-
-         <span class="text-gray-300 text-sm">Hi, {{ username }}</span> 
-
-         <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90"> 
-
-          Logout 
-
-         </a> 
-
-       </div> 
-
-  
-
-       {% else %} 
-
-       <div class="flex items-center gap-3 ml-auto"> 
-         <span class="text-gray-300 text-sm">Hi, {{ username }}</span>
-         <a href="/login" class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90"> 
-
-           Login 
-
-         </a> 
-        
-         <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90"> 
-
-           Logout 
-
-          </a> 
-
-       </div> 
-
-       {% endif %} 
-
-     </nav> 
-
-      
-
-    </div> 
-
-  </header> 
-
-  
-
-  <main class="max-w-7xl mx-auto px-6 pt-8 pb-20"> 
-
-    <section class="grid lg:grid-cols-2 gap-1 items-start"> 
-
-      <div> 
-
-       <h1 class="mt-0 text-5xl font-bold bg-gradient-to-r from-violet-400 via-pink-400 to-purple-500 bg-clip-text text-transparent"> 
-
-          Smarter Hiring for Safer Services 
-
-        </h1> 
-
-  
-
-        <p class="text-lg text-gray-200 mt-3"> 
-
-          Register workers, verify profiles, post jobs, hire safely, and track every transaction through one clean platform 
-
-        </p> 
-
-  
-
-        <div class="mt-10 flex flex-wrap gap-4"> 
-
-          <a href="javascript:void(0);" id="openDashboardButton" class="inline-flex items-center px-7 py-4 rounded-3xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold text-lg hover:opacity-90 transition shadow-glow"> 
-
-            Open Dashboard 
-
-            <span class="ml-3 text-xl"></span> 
-
-          </a> 
-
-  
-
-          <a href="/jobs" class="inline-flex items-center px-7 py-4 rounded-3xl border border-white/15 bg-white/10 backdrop-blur text-white font-semibold text-lg hover:bg-white/15 transition"> 
-
-            Explore Jobs 
-
-          </a> 
-
-        </div> 
-
-      </div> 
-
-  
-
-      <div class="relative"> 
-
-        <div class="absolute -top-10 -left-10 h-40 w-40 bg-pink-500/20 blur-3xl rounded-full"></div> 
-
-        <div class="absolute -bottom-8 -right-6 h-48 w-48 bg-purple-500/20 blur-3xl rounded-full"></div> 
-
-  
-
-        <div class="relative rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-8 shadow-2xl"> 
-
-          <div class="grid sm:grid-cols-2 gap-4"> 
-
-            <div class="rounded-3xl border border-white/10 bg-white/5 p-5"> 
-
-              <p class="text-sm text-gray-300">Workers Registered</p> 
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SafeHire</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "ui-sans-serif", "system-ui"]
+          },
+          colors: {
+            brand: {
+              50: "#F5D0FE",
+              100: "#F0ABFC",
+              500: "#EC4899",
+              600: "#DB2777",
+              700: "#BE185D"
+            }
+          },
+          boxShadow: {
+            glow: "0 0 40px rgba(236,72,153,0.25)"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
+
+  <header class="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b border-white/10">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3">
+      <div class="flex items-center gap-3">
+        <img
+          src="/static/images/SafeHire_logo.png"
+          alt="SafeHire Logo"
+          class="h-12 w-12 rounded-full shadow-lg"
+        />
+        <div>
+          <p class="font-bold text-xl leading-5 text-white">SafeHire</p>
+          <p class="text-xs text-gray-300 mt-1">AI Powered Service Hiring Platform</p>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full">
+
+        <div class="flex items-center gap-3 ml-auto">
+          <a href="/signup"
+             class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90">
+            Sign Up
+          </a>
+
+          <a href="/login"
+             class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 transition">
+            Login
+          </a>
+
+          <a href="/login"
+             class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
+            Admin Login
+          </a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-6 pt-8 pb-20">
+
+    <section class="grid lg:grid-cols-2 gap-1 items-start">
+      <div>
+        <h1 class="mt-0 text-5xl font-bold bg-gradient-to-r from-violet-400 via-pink-400 to-purple-500 bg-clip-text text-transparent">
+          Smarter Hiring for Safer Services
+        </h1>
+
+        <p class="text-lg text-gray-200 mt-3">
+          Register workers, verify profiles, post jobs, hire safely, and track every transaction through one clean platform
+        </p>
+      </div>
+
+      <div class="relative">
+        <div class="absolute -top-10 -left-10 h-40 w-40 bg-pink-500/20 blur-3xl rounded-full"></div>
+        <div class="absolute -bottom-8 -right-6 h-48 w-48 bg-purple-500/20 blur-3xl rounded-full"></div>
+
+        <div class="relative rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-xl p-6 md:p-8 shadow-2xl">
+          <div class="grid sm:grid-cols-2 gap-4">
+
+            <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
+              <p class="text-sm text-gray-300">Workers Registered</p>
               <p class="mt-2 text-3xl font-bold text-white">{{ total_workers }}+</p>
+              <p class="mt-2 text-sm text-emerald-300">Growing verified network</p>
+            </div>
 
-              <p class="mt-2 text-sm text-emerald-300">Growing verified network</p> 
-
-            </div> 
-
-  
-
-            <div class="rounded-3xl border border-white/10 bg-white/5 p-5"> 
-
-              <p class="text-sm text-gray-300">Jobs Posted</p> 
-
+            <div class="rounded-3xl border border-white/10 bg-white/5 p-5">
+              <p class="text-sm text-gray-300">Jobs Posted</p>
               <p class="mt-2 text-3xl font-bold text-white">{{ total_jobs }}+</p>
-
-              <p class="mt-2 text-sm text-pink-300">Active hiring requests</p> 
-
-            </div> 
-
-  
-
-            <div class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:col-span-2"> 
-
-              <p class="text-sm text-gray-300">Platform Workflow</p> 
-
-              <div class="mt-4 grid md:grid-cols-4 gap-3 text-sm"> 
-
-                <div class="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 text-white"> 
-
-                  Register Worker 
-
-                </div> 
-
-                <div class="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 text-white"> 
-
-                  Verify Profile 
-
-                </div> 
-
-                <div class="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 text-white"> 
-
-                  Post Job 
-
-                </div> 
-
-                <div class="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 text-white"> 
-
-                  Hire Safely 
-
-                </div> 
-
-              </div> 
-
-            </div> 
-
-  
-
-            <div class="rounded-3xl border border-white/10 bg-gradient-to-r from-pink-500/20 to-purple-500/20 p-5 sm:col-span-2"> 
-
-              <p class="text-sm text-pink-200 font-medium">AI Recommendation</p> 
-
-              <p class="mt-2 text-white text-lg font-semibold">Suggested worker based on skill, verification, and risk score</p> 
-
-              <p class="mt-2 text-sm text-gray-300">A simple recommendation layer helps employers choose suitable workers faster</p> 
-
-            </div> 
-
-          </div> 
-
-        </div> 
-
-      </div> 
-
-    </section> 
-
-  
-
-    <section class="grid md:grid-cols-2 xl:grid-cols-3 gap-5 mt-20"> 
-
-      <a href="/add-worker" class="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur p-6 hover:bg-white/10 transition"> 
-
-        <p class="text-lg font-semibold text-white">Worker Registration</p> 
-
-        <p class="mt-2 text-gray-300">Add worker name, NID, phone, address, and skills into the platform.</p> 
-
-      </a> 
-
-  
-
-      <a href="/worker-dashboard" class="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur p-6 hover:bg-white/10 transition"> 
-
-        <p class="text-lg font-semibold text-white">Worker Dashboard</p> 
-
-        <p class="mt-2 text-gray-300">Browse registered workers with skill, risk score, and verification state.</p> 
-
-      </a> 
-
-  
-
-      <a href="/verify-workers" class="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur p-6 hover:bg-white/10 transition"> 
-
-        <p class="text-lg font-semibold text-white">Verification Workflow</p> 
-
-        <p class="mt-2 text-gray-300">Approve or reject worker profiles from the admin view.</p> 
-
-      </a> 
-
-  
-
-      <a href="/jobs" class="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur p-6 hover:bg-white/10 transition"> 
-
-        <p class="text-lg font-semibold text-white">Jobs & Hiring</p> 
-
-        <p class="mt-2 text-gray-300">Post jobs, review open listings, and hire verified workers securely.</p> 
-
-      </a> 
-
-  
-
-      <a href="/transactions" class="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur p-6 hover:bg-white/10 transition"> 
-
-        <p class="text-lg font-semibold text-white">Transaction History</p> 
-
-        <p class="mt-2 text-gray-300">Track employer, worker, job details, and transaction status transparently.</p> 
-
-      </a> 
-
-    </section> 
-
-  </main> 
-
-  
-
-   
-
-  <script> 
-
-    document.getElementById('openDashboardButton').addEventListener('click', function() { 
-
-      
-
-      const userRole = '{{ role }}';   
-
-  
-
-      if (userRole === 'admin') { 
-
-        window.location.href = '/admin-dashboard';   
-
-      } else if (userRole === 'employer') { 
-
-        window.location.href = '/jobs';   
-
-      } else if (userRole === 'worker') { 
-
-        window.location.href = '/worker-dashboard';   
-
-      } else { 
-
-        alert('Role not defined or not logged in'); 
-
-      } 
-
-    }); 
-
-  </script> 
-
-</body> 
-
+              <p class="mt-2 text-sm text-pink-300">Active hiring requests</p>
+            </div>
+
+            <div class="rounded-3xl border border-white/10 bg-white/5 p-5 sm:col-span-2">
+              <p class="text-sm text-gray-300">Platform Workflow</p>
+              <div class="mt-4 grid md:grid-cols-4 gap-3 text-sm">
+                <div class="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 text-white">
+                  Register Worker
+                </div>
+                <div class="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 text-white">
+                  Verify Profile
+                </div>
+                <div class="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 text-white">
+                  Post Job
+                </div>
+                <div class="rounded-2xl bg-black/20 border border-white/10 px-4 py-3 text-white">
+                  Hire Safely
+                </div>
+              </div>
+            </div>
+
+            <div class="rounded-3xl border border-white/10 bg-gradient-to-r from-pink-500/20 to-purple-500/20 p-5 sm:col-span-2">
+              <p class="text-sm text-pink-200 font-medium">AI Recommendation</p>
+              <p class="mt-2 text-white text-lg font-semibold">
+                Suggested worker based on skill, verification, and risk score
+              </p>
+              <p class="mt-2 text-sm text-gray-300">
+                A simple recommendation layer helps employers choose suitable workers faster
+              </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid md:grid-cols-2 xl:grid-cols-3 gap-5 mt-20">
+
+      <a href="/add-worker" class="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur p-6 hover:bg-white/10 transition">
+        <p class="text-lg font-semibold text-white">Worker Registration</p>
+        <p class="mt-2 text-gray-300">Add worker name, NID, phone, address, and skills into the platform.</p>
+      </a>
+
+      <a href="/worker-dashboard" class="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur p-6 hover:bg-white/10 transition">
+        <p class="text-lg font-semibold text-white">Worker Dashboard</p>
+        <p class="mt-2 text-gray-300">Browse registered workers with skill, risk score, and verification state.</p>
+      </a>
+
+      <a href="/admin-workers" class="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur p-6 hover:bg-white/10 transition">
+        <p class="text-lg font-semibold text-white">Manage Workers</p>
+        <p class="mt-2 text-gray-300">Approve or reject worker profiles from the admin view.</p>
+      </a>
+
+      <a href="/jobs" class="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur p-6 hover:bg-white/10 transition">
+        <p class="text-lg font-semibold text-white">Jobs & Hiring</p>
+        <p class="mt-2 text-gray-300">Post jobs, review open listings, and hire verified workers securely.</p>
+      </a>
+
+      <a href="/transactions" class="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur p-6 hover:bg-white/10 transition">
+        <p class="text-lg font-semibold text-white">Transaction History</p>
+        <p class="mt-2 text-gray-300">Track employer, worker, job details, and transaction status transparently.</p>
+      </a>
+
+    </section>
+
+  </main>
+
+</body>
 </html>
