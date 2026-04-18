@@ -155,7 +155,6 @@ function getAdminViewCard(job) {
 
       <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
         <p class="text-xs text-gray-300">Job ID: ${job.id}</p>
-        <p class="text-xs text-amber-300 font-medium">Read Only</p>
       </div>
     </div>
   `;

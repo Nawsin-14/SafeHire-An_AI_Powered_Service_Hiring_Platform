@@ -77,9 +77,8 @@
         </h2>
 
         {% if role == "admin" %}
-        <p class="text-sm text-amber-300 mt-2">Admin View Only — no actions available on this page.</p>
         {% else %}
-        <p class="text-sm text-white/70 mt-2">Manage your jobs and view the best verified worker matches.</p>
+        <p class="text-sm text-white/70 mt-2">Manage your jobs and view the best verified worker matches</p>
         {% endif %}
       </div>
     </div>
@@ -87,7 +86,6 @@
     <div id="jobsContainer" class="grid md:grid-cols-2 gap-6"></div>
   </main>
 
-  <!-- Custom Modal -->
   <div id="messageModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
     <div class="w-full max-w-md bg-gradient-to-br from-[#24124D] to-[#6B21A8] border border-white/10 rounded-3xl shadow-2xl p-6 text-white">
       <div class="flex items-start gap-4">
@@ -99,7 +97,7 @@
         <div class="flex-1">
           <h2 id="modalTitle" class="text-2xl font-bold mb-2">Success</h2>
           <p id="modalMessage" class="text-white/80 leading-relaxed">
-            Action completed successfully.
+            Action completed successfully
           </p>
         </div>
       </div>
