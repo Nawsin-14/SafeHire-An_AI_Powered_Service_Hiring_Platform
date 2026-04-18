@@ -160,6 +160,44 @@ def login():
         return jsonify({"error": f"Login failed: {str(e)}"}), 500
 
 
+@app.route("/admin-login", methods=["GET", "POST"])
+def admin_login():
+    if request.method == "GET":
+        return render_template("admin_login.html")
+
+    try:
+        data = request.get_json(silent=True) or request.form.to_dict() or {}
+
+        username = data.get("username", "").strip()
+        password = data.get("password", "").strip()
+
+        if not username or not password:
+            return jsonify({"error": "Username and password are required"}), 400
+
+        if username not in ["Nazia", "Afrid"]:
+            return jsonify({"error": "Only Nazia or Afrid can login as admin"}), 403
+
+        user = User.query.filter_by(username=username, role="admin").first()
+
+        if not user:
+            return jsonify({"error": "Admin account not found"}), 404
+
+        if not verify_user_password(user, password):
+            return jsonify({"error": "Invalid admin password"}), 401
+
+        session["user_id"] = user.id
+        session["username"] = user.username
+        session["role"] = user.role
+
+        return jsonify({
+            "message": "Admin login successful",
+            "redirect": "/admin-dashboard"
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Admin login failed: {str(e)}"}), 500
+
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -291,6 +329,7 @@ def add_worker():
         db.session.rollback()
         return jsonify({"error": f"Failed to create worker profile: {str(e)}"}), 500
 
+
 @app.route("/update-worker")
 def update_worker_page():
     if not is_logged_in():
@@ -400,30 +439,56 @@ def verify_worker(worker_id):
         return jsonify({"error": f"Failed to update worker verification: {str(e)}"}), 500
 
 
-@app.route("/create-admin")
-def create_admin():
+@app.route("/create-admins")
+def create_admins():
     try:
-        existing_admin = User.query.filter_by(username="admin").first()
-        if existing_admin:
-            return "Admin already exists!"
+        shared_password = "12345"
 
-        admin = User(
-            username="admin",
-            password=generate_password_hash("123"),
-            role="admin",
-            phone="00000000000",
-            nid="0000000000000",
-            address="Admin Office",
-            gender="other"
-        )
+        admins_to_create = [
+            {
+                "username": "Nazia",
+                "role": "admin",
+                "phone": "01700000001",
+                "nid": "1111111111111",
+                "address": "Admin Office",
+                "gender": "female"
+            },
+            {
+                "username": "Afrid",
+                "role": "admin",
+                "phone": "01700000002",
+                "nid": "2222222222222",
+                "address": "Admin Office",
+                "gender": "male"
+            }
+        ]
 
-        db.session.add(admin)
-        db.session.commit()
+        created_any = False
 
-        return "Admin created!"
+        for admin_data in admins_to_create:
+            existing_user = User.query.filter_by(username=admin_data["username"]).first()
+            if not existing_user:
+                admin = User(
+                    username=admin_data["username"],
+                    password=generate_password_hash(shared_password),
+                    role=admin_data["role"],
+                    phone=admin_data["phone"],
+                    nid=admin_data["nid"],
+                    address=admin_data["address"],
+                    gender=admin_data["gender"]
+                )
+                db.session.add(admin)
+                created_any = True
+
+        if created_any:
+            db.session.commit()
+            return "Admins created successfully!"
+        else:
+            return "Admins already exist!"
+
     except Exception as e:
         db.session.rollback()
-        return f"Failed to create admin: {str(e)}", 500
+        return f"Failed to create admins: {str(e)}", 500
 
 
 @app.route("/admin-dashboard")
