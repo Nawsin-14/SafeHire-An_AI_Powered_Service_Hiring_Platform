@@ -825,3 +825,76 @@ def complete_payment(transaction_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to complete payment: {str(e)}"}), 500
+    
+@app.route("/add_review", methods=["POST"])
+def add_review():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("employer"):
+        return jsonify({"error": "Only employers can submit reviews"}), 403
+
+    try:
+        data = request.get_json(silent=True) or request.form.to_dict() or {}
+
+        worker_id = data.get("worker_id")
+        transaction_id = data.get("transaction_id")
+        rating = data.get("rating")
+        comment = (data.get("comment") or "").strip()
+
+        if not worker_id or not transaction_id or rating in [None, ""] or not comment:
+            return jsonify({"error": "All review fields are required"}), 400
+
+        try:
+            worker_id = int(worker_id)
+            transaction_id = int(transaction_id)
+            rating = float(rating)
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid review data"}), 400
+
+        if rating < 1 or rating > 5:
+            return jsonify({"error": "Rating must be between 1 and 5"}), 400
+
+        transaction = HireTransaction.query.get(transaction_id)
+        if not transaction:
+            return jsonify({"error": "Transaction not found"}), 404
+
+        if transaction.employer_id != session["user_id"]:
+            return jsonify({"error": "You can only review your own transactions"}), 403
+
+        if transaction.worker_id != worker_id:
+            return jsonify({"error": "Worker does not match this transaction"}), 400
+
+        if (transaction.status or "").lower() != "completed":
+            return jsonify({"error": "You can only review completed transactions"}), 400
+
+        existing_review = Review.query.filter_by(transaction_id=transaction_id).first()
+        if existing_review:
+            return jsonify({"error": "Review already submitted for this transaction"}), 400
+
+        worker = Worker.query.get(worker_id)
+        if not worker:
+            return jsonify({"error": "Worker not found"}), 404
+
+        new_review = Review(
+            employer_id=session["user_id"],
+            worker_id=worker_id,
+            transaction_id=transaction_id,
+            rating=int(round(rating)),
+            comment=comment
+        )
+
+        db.session.add(new_review)
+        db.session.commit()
+
+        all_reviews = Review.query.filter_by(worker_id=worker_id).all()
+        if all_reviews:
+            avg_rating = sum(r.rating for r in all_reviews) / len(all_reviews)
+            worker.rating = round(avg_rating, 1)
+            db.session.commit()
+
+        return jsonify({"message": "Review submitted successfully"}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to submit review: {str(e)}"}), 500

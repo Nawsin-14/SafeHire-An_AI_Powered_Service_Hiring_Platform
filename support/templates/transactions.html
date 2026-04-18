@@ -121,7 +121,6 @@
   </div>
 </div>
 
-<!-- SafeHire Message Modal -->
 <div id="messageModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
   <div class="w-full max-w-md bg-gradient-to-br from-[#24124D] to-[#6B21A8] border border-white/10 rounded-3xl shadow-2xl p-6 text-white">
     <div class="flex items-start gap-4">
@@ -133,7 +132,7 @@
       <div class="flex-1">
         <h2 id="modalTitle" class="text-2xl font-bold mb-2">Success</h2>
         <p id="modalMessage" class="text-white/80 leading-relaxed">
-          Action completed successfully.
+          Action completed successfully
         </p>
       </div>
     </div>
@@ -322,7 +321,7 @@ async function submitReview() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         worker_id: selectedWorkerId,
-        job_id: selectedJobId,
+        transaction_id: selectedTransactionId,
         rating,
         comment
       })
@@ -339,6 +338,7 @@ async function submitReview() {
     document.getElementById("ratingInput").value = "";
     document.getElementById("commentInput").value = "";
     showMessageModal("success", data.message || "Review submitted successfully.");
+    loadTransactions();
   } catch (error) {
     console.error(error);
     showMessageModal("error", "Something went wrong while submitting the review.");
@@ -360,7 +360,6 @@ async function payNow(id) {
     let data = await res.json().catch(() => null);
 
     if (!res.ok) {
-      // fallback for older backend route if present
       const fallbackRes = await fetch("/pay_transaction", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
