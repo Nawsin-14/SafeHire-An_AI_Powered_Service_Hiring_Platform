@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add Worker - SafeHire</title>
+  <title>SafeHire-add worker</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,154 +36,145 @@
 </head>
 
 <body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
+
   <header class="sticky top-0 z-50 bg-black/30 backdrop-blur border-b border-white/10">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <img 
-          src="/static/images/SafeHire_logo.png"
-          alt="SafeHire Logo"
-          class="h-12 w-12 rounded-full shadow-lg"
-        />
+        <img src="/static/images/SafeHire_logo.png" alt="Logo"
+          class="h-12 w-12 rounded-full shadow-lg" />
         <div>
-          <p class="font-semibold leading-5 text-white">SafeHire</p>
-          <p class="text-xs text-gray-300 -mt-0.5">AI Powered Hiring Platform</p>
+          <p class="font-semibold text-white">SafeHire</p>
+          <p class="text-xs text-gray-300">AI Powered Hiring Platform</p>
         </div>
       </div>
 
-<nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full">
-  <a class="hover:text-white" href="/">Home</a>
+      <nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full">
+        <a class="hover:text-white" href="/">Home</a>
 
-  {% if username %}
-    {% if role == "admin" %}
-      <a class="hover:text-white" href="/worker-dashboard">Workers</a>
-      <a class="hover:text-white" href="/verify-workers">Verify</a>
-      <a class="hover:text-white" href="/transactions">Transactions</a>
-    {% elif role == "user" %}
-      <a class="hover:text-white" href="/worker-dashboard">Workers</a>
-      <a class="hover:text-white" href="/add-worker">Add Worker</a>
-      <a class="hover:text-white" href="/jobs">Jobs</a>
-      <a class="hover:text-white" href="/transactions">Transactions</a>
-    {% endif %}
+        {% if username %}
+          {% if role == "admin" %}
+            <a href="/worker-dashboard">Workers</a>
+            <a href="/verify-workers">Verify</a>
+            <a href="/transactions">Transactions</a>
+          {% elif role == "worker" %}
+            <a href="/worker-dashboard">Dashboard</a>
+          {% endif %}
 
-    <div class="flex items-center gap-3 ml-auto">
-      <span class="text-gray-300 text-sm">Hi, {{ username }}</span>
-      <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
-        Logout
-      </a>
-    </div>
+          <div class="flex items-center gap-3 ml-auto">
+            <span>Hi, {{ username }}</span>
+            <a href="/logout" class="px-4 py-2 bg-purple-500 rounded-xl text-white">Logout</a>
+          </div>
 
-  {% else %}
-    <div class="flex items-center gap-3 ml-auto">
-      <a href="/login" class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90">
-        Login
-      </a>
-      <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
-       Logout
-      </a>
-    </div>
-  {% endif %}
-</nav>
+        {% else %}
+          <div class="ml-auto flex gap-3">
+            <a href="/login" class="px-4 py-2 bg-pink-500 rounded-xl text-white">Login</a>
+          </div>
+        {% endif %}
+      </nav>
     </div>
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-8">
-    <div class="max-w-3xl mx-auto rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-xl p-8 md:p-10 shadow-2xl">
-      <div class="mb-4">
-        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight text-white">
-          Register a Worker
-        </h1>
+    <div class="max-w-3xl mx-auto rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl">
 
-      </div>
+      <h1 class="text-4xl font-extrabold mb-6">Create Your Profile</h1>
 
       <form id="workerForm" class="space-y-6">
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+
           <div>
-            <label for="name" class="block text-sm font-semibold text-white mb-2">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              placeholder="Enter worker name"
-              required
-              class="w-full h-12 rounded-2xl border border-white/10 bg-white/10 text-white placeholder:text-gray-400 px-4 outline-none focus:ring-4 focus:ring-pink-500/20 focus:border-pink-400"
-            />
+            <label class="block mb-2">Full Name</label>
+            <input type="text" id="name" required
+              class="w-full h-12 px-4 rounded-2xl bg-white/10 border border-white/10 text-white" />
           </div>
 
           <div>
-            <label for="nid" class="block text-sm font-semibold text-white mb-2">NID</label>
-            <input
-              type="text"
-              id="nid"
-              name="nid"
-              placeholder="Enter NID number"
-              required
-              class="w-full h-12 rounded-2xl border border-white/10 bg-white/10 text-white placeholder:text-gray-400 px-4 outline-none focus:ring-4 focus:ring-pink-500/20 focus:border-pink-400"
-            />
+            <label class="block mb-2">NID</label>
+            <input type="text" id="nid" required
+              class="w-full h-12 px-4 rounded-2xl bg-white/10 border border-white/10 text-white" />
           </div>
 
           <div>
-            <label for="phone" class="block text-sm font-semibold text-white mb-2">Phone</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              placeholder="Enter phone number"
-              required
-              class="w-full h-12 rounded-2xl border border-white/10 bg-white/10 text-white placeholder:text-gray-400 px-4 outline-none focus:ring-4 focus:ring-pink-500/20 focus:border-pink-400"
-            />
+            <label class="block mb-2">Phone</label>
+            <input type="text" id="phone" required
+              class="w-full h-12 px-4 rounded-2xl bg-white/10 border border-white/10 text-white" />
           </div>
 
           <div>
-            <label for="address" class="block text-sm font-semibold text-white mb-2">Address</label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              placeholder="Enter address"
-              required
-              class="w-full h-12 rounded-2xl border border-white/10 bg-white/10 text-white placeholder:text-gray-400 px-4 outline-none focus:ring-4 focus:ring-pink-500/20 focus:border-pink-400"
-            />
+            <label class="block mb-2">Address</label>
+            <input type="text" id="address" required
+              class="w-full h-12 px-4 rounded-2xl bg-white/10 border border-white/10 text-white" />
+          </div>
+
+          <div>
+            <label class="block mb-2">Experience (Years)</label>
+            <input type="number" id="experience" min="0" required
+              class="w-full h-12 px-4 rounded-2xl bg-white/10 border border-white/10 text-white" />
           </div>
 
           <div class="md:col-span-2">
-            <label for="skills" class="block text-sm font-semibold text-white mb-2">Skills</label>
-            <input
-              type="text"
-              id="skills"
-              name="skills"
-              placeholder="Example: Electrician, Wiring, Repair"
-              required
-              class="w-full h-12 rounded-2xl border border-white/10 bg-white/10 text-white placeholder:text-gray-400 px-4 outline-none focus:ring-4 focus:ring-pink-500/20 focus:border-pink-400"
-            />
+            <label class="block mb-2">Profession</label>
+            <input type="text" id="skills" required
+              placeholder="Electrician, Plumbing, Repair"
+              class="w-full h-12 px-4 rounded-2xl bg-white/10 border border-white/10 text-white" />
           </div>
+
         </div>
 
-        <div class="pt-2">
-          <button
-            type="submit"
-            class="inline-flex items-center px-6 py-3 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold hover:opacity-90 transition shadow-glow"
-          >
-            Add Worker
-          </button>
-        </div>
+        <button type="submit"
+          class="px-6 py-3 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-500 font-semibold">
+          Create Profile
+        </button>
 
-        <div id="formMessage" class="hidden rounded-2xl px-4 py-3 text-sm font-medium"></div>
+        <div id="formMessage" class="text-sm mt-3"></div>
+
       </form>
     </div>
   </main>
 
-  <script src="{{ url_for('static', filename='js/worker_api.js') }}"></script>
+<script>
+  document.getElementById("workerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  <script>
-    const formMessage = document.getElementById("formMessage");
+    const payload = {
+      name: document.getElementById("name").value,
+      nid: document.getElementById("nid").value,
+      phone: document.getElementById("phone").value,
+      address: document.getElementById("address").value,
+      skills: document.getElementById("skills").value,
+      experience: document.getElementById("experience").value
+    };
 
-    const observer = new MutationObserver(() => {
-      if (formMessage.textContent.trim() !== "") {
-        formMessage.classList.remove("hidden");
+    const msg = document.getElementById("formMessage");
+
+    try {
+      const res = await fetch("/add_worker", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        msg.innerHTML = "<span class='text-green-400'>Worker profile created successfully! Redirecting...</span>";
+
+        // 🔥 REDIRECT AFTER SUCCESS
+        setTimeout(() => {
+          window.location.href = "/worker-dashboard";
+        }, 1200);
+
+      } else {
+        msg.innerHTML = `<span class='text-red-400'>${data.error}</span>`;
       }
-    });
 
-    observer.observe(formMessage, { childList: true, subtree: true });
-  </script>
+    } catch (error) {
+      msg.innerHTML = `<span class='text-red-400'>Server error</span>`;
+    }
+  });
+</script>
+
 </body>
 </html>

@@ -1,8 +1,8 @@
 from flask import jsonify, render_template, redirect, request, session
+from werkzeug.security import generate_password_hash, check_password_hash
 from support.app import app
 from support.models import db, Worker, Job, HireTransaction, User, Review
 from support.services.matching import calculate_match_score
-from sqlalchemy import desc
 
 
 def is_logged_in():
@@ -35,23 +35,61 @@ def signup():
     if request.method == "GET":
         return render_template("signup.html")
 
-    data = request.get_json(silent=True) or {}
+    try:
+        data = request.get_json(silent=True) or {}
 
-    username = data.get("username", "").strip()
-    password = data.get("password", "").strip()
-    role = data.get("role", "").strip()
+        username = data.get("username", "").strip()
+        password = data.get("password", "").strip()
+        role = data.get("role", "").strip()
+        phone = data.get("phone", "").strip()
+        nid = data.get("nid", "").strip()
+        address = data.get("address", "").strip()
+        gender = data.get("gender", "").strip()
 
-    if not username or not password or role not in ["worker", "employer"]:
-        return jsonify({"error": "Invalid input"}), 400
+        if not all([username, password, role, phone, nid, address, gender]):
+            return jsonify({"error": "All fields are required"}), 400
 
-    if User.query.filter_by(username=username).first():
-        return jsonify({"error": "Username already exists"}), 400
+        if role not in ["worker", "employer"]:
+            return jsonify({"error": "Invalid role selected"}), 400
 
-    user = User(username=username, password=password, role=role)
-    db.session.add(user)
-    db.session.commit()
+        if not phone.isdigit() or len(phone) != 11:
+            return jsonify({"error": "Phone number must be exactly 11 digits"}), 400
 
-    return jsonify({"message": "Signup successful"}), 201
+        if not nid.isdigit() or len(nid) != 13:
+            return jsonify({"error": "NID must be exactly 13 digits"}), 400
+
+        if gender.lower() not in ["male", "female", "other"]:
+            return jsonify({"error": "Invalid gender selected"}), 400
+
+        if User.query.filter_by(username=username).first():
+            return jsonify({"error": "Username already exists"}), 400
+
+        if hasattr(User, "phone") and User.query.filter_by(phone=phone).first():
+            return jsonify({"error": "Phone number already exists"}), 400
+
+        if hasattr(User, "nid") and User.query.filter_by(nid=nid).first():
+            return jsonify({"error": "NID already exists"}), 400
+
+        hashed_password = generate_password_hash(password)
+
+        user = User(
+            username=username,
+            password=hashed_password,
+            role=role,
+            phone=phone,
+            nid=nid,
+            address=address,
+            gender=gender
+        )
+
+        db.session.add(user)
+        db.session.commit()
+
+        return jsonify({"message": "Signup successful"}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Signup failed: {str(e)}"}), 500
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -59,27 +97,34 @@ def login():
     if request.method == "GET":
         return render_template("login.html")
 
-    data = request.get_json(silent=True) or {}
+    try:
+        data = request.get_json(silent=True) or {}
 
-    username = data.get("username", "").strip()
-    password = data.get("password", "").strip()
+        username = data.get("username", "").strip()
+        password = data.get("password", "").strip()
 
-    user = User.query.filter_by(username=username).first()
+        if not username or not password:
+            return jsonify({"error": "Username and password are required"}), 400
 
-    if not user or user.password != password:
-        return jsonify({"error": "Invalid credentials"}), 401
+        user = User.query.filter_by(username=username).first()
 
-    session["user_id"] = user.id
-    session["username"] = user.username
-    session["role"] = user.role
+        if not user or not check_password_hash(user.password, password):
+            return jsonify({"error": "Invalid credentials"}), 401
 
-    return jsonify({
-        "message": "Login successful",
-        "role": user.role,
-        "redirect": "/admin-dashboard" if user.role == "admin"
-        else "/worker-dashboard" if user.role == "worker"
-        else "/jobs"
-    }), 200
+        session["user_id"] = user.id
+        session["username"] = user.username
+        session["role"] = user.role
+
+        return jsonify({
+            "message": "Login successful",
+            "role": user.role,
+            "redirect": "/admin-dashboard" if user.role == "admin"
+            else "/worker-dashboard" if user.role == "worker"
+            else "/jobs"
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Login failed: {str(e)}"}), 500
 
 
 @app.route("/logout")
@@ -241,7 +286,16 @@ def create_admin():
     if User.query.filter_by(username="admin").first():
         return "Admin already exists!"
 
-    admin = User(username="admin", password="123", role="admin")
+    admin = User(
+        username="admin",
+        password=generate_password_hash("123"),
+        role="admin",
+        phone="00000000000",
+        nid="0000000000000",
+        address="Admin Office",
+        gender="other"
+    )
+
     db.session.add(admin)
     db.session.commit()
 
@@ -466,6 +520,7 @@ def transactions_page():
         username=session["username"],
         role=session["role"]
     )
+
 
 @app.route("/transactions_api", methods=["GET"])
 def get_transactions():

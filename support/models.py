@@ -9,12 +9,20 @@ class User(db.Model):
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(20), nullable=False)
+    phone = db.Column(db.String(11), nullable=False)
+    nid = db.Column(db.String(13), nullable=False)
+    address = db.Column(db.String(200), nullable=False)
+    gender = db.Column(db.String(10), nullable=False)
 
     def to_dict(self):
         return {
             "id": self.id,
             "username": self.username,
-            "role": self.role
+            "role": self.role,
+            "phone": self.phone,
+            "nid": self.nid,
+            "address": self.address,
+            "gender": self.gender
         }
 
 

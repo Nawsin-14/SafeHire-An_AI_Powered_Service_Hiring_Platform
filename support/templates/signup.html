@@ -83,40 +83,43 @@
     </div>
 
     <script>
-        document.getElementById("signupForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+      document.getElementById("signupForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-            const phone = document.getElementById("phone").value.trim();
-            const nid = document.getElementById("nid").value.trim();
-            const password = document.getElementById("password").value;
-            const msg = document.getElementById("msg");
+        const phone = document.getElementById("phone").value.trim();
+        const nid = document.getElementById("nid").value.trim();
+        const password = document.getElementById("password").value;
+        const msg = document.getElementById("msg");
 
-            if (!/^\d{11}$/.test(phone)) {
-                msg.innerHTML = "<span class='text-red-400'>Phone number must be exactly 11 digits.</span>";
-                return;
-            }
+        msg.innerHTML = "";
 
-            if (!/^\d{13}$/.test(nid)) {
-                msg.innerHTML = "<span class='text-red-400'>NID must be exactly 13 digits.</span>";
-                return;
-            }
+        if (!/^\d{11}$/.test(phone)) {
+            msg.innerHTML = "<span class='text-red-400'>Phone number must be exactly 11 digits.</span>";
+            return;
+        }
 
-            const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{6,}$/;
-            if (!passwordRegex.test(password)) {
-                msg.innerHTML = "<span class='text-red-400'>Password must contain at least 1 capital letter, 1 number, and 1 special character.</span>";
-                return;
-            }
+        if (!/^\d{13}$/.test(nid)) {
+            msg.innerHTML = "<span class='text-red-400'>NID must be exactly 13 digits.</span>";
+            return;
+        }
 
-            const payload = {
-                username: document.getElementById("username").value,
-                phone: phone,
-                nid: nid,
-                address: document.getElementById("address").value,
-                gender: document.getElementById("gender").value,
-                password: password,
-                role: document.getElementById("role").value
-            };
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{6,}$/;
+        if (!passwordRegex.test(password)) {
+            msg.innerHTML = "<span class='text-red-400'>Password must contain at least 1 capital letter, 1 number, and 1 special character.</span>";
+            return;
+        }
 
+        const payload = {
+            username: document.getElementById("username").value.trim(),
+            phone: phone,
+            nid: nid,
+            address: document.getElementById("address").value.trim(),
+            gender: document.getElementById("gender").value,
+            password: password,
+            role: document.getElementById("role").value
+        };
+
+        try {
             const res = await fetch("/signup", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -126,12 +129,17 @@
             const data = await res.json();
 
             if (res.ok) {
-                msg.innerHTML = '<span class="text-white">Signup successful! Redirecting...</span>';
-                setTimeout(() => window.location.href = "/login", 1200);
+                msg.innerHTML = "<span class='text-green-300'>Signup successful! Redirecting...</span>";
+                setTimeout(() => {
+                    window.location.href = "/login";
+                }, 1200);
             } else {
-                msg.innerHTML = `<span class='text-red-400'>${data.error}</span>`;
+                msg.innerHTML = `<span class='text-red-400'>${data.error || "Signup failed"}</span>`;
             }
-        });
+        } catch (error) {
+            msg.innerHTML = `<span class='text-red-400'>Server error: ${error.message}</span>`;
+         }
+      });
     </script>
 
 </body>
