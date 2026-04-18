@@ -8,29 +8,62 @@
 
 <body class="h-screen flex items-center justify-center bg-gradient-to-br from-[#2a1454] to-[#3b1d6b]">
 
-    <div class="w-full max-w-md bg-[#4b3a6b] rounded-3xl p-8 shadow-xl">
+    <div class="w-full max-w-sm bg-[#4b3a6b] rounded-3xl p-6 shadow-xl">
 
         <h2 class="text-white text-2xl font-bold text-center mb-6">
             Create Account
         </h2>
 
-        <form id="signupForm" class="space-y-4">
+        <form id="signupForm" class="space-y-3">
 
             <input type="text" id="username" placeholder="Username"
                 class="w-full px-4 py-3 rounded-xl bg-transparent border border-gray-400 text-white placeholder-gray-300 focus:outline-none focus:border-pink-400"
                 required>
 
+            <input type="text" id="phone" placeholder="Phone Number (11 digits)"
+                class="w-full px-4 py-3 rounded-xl bg-transparent border border-gray-400 text-white placeholder-gray-300 focus:outline-none focus:border-pink-400"
+                required>
+
+            <input type="text" id="nid" placeholder="NID (13 digits)"
+                class="w-full px-4 py-3 rounded-xl bg-transparent border border-gray-400 text-white placeholder-gray-300 focus:outline-none focus:border-pink-400"
+                required>
+
+            <input type="text" id="address" placeholder="Address"
+                class="w-full px-4 py-3 rounded-xl bg-transparent border border-gray-400 text-white placeholder-gray-300 focus:outline-none focus:border-pink-400"
+                required>
+
+            <div class="relative">
+                <select id="gender"
+                    class="w-full px-4 py-3 rounded-xl bg-[#4b3a6b] border border-gray-400 text-white focus:outline-none focus:border-pink-400 appearance-none"
+                    required>
+                    <option value="" class="text-black">Select Gender</option>
+                    <option value="male" class="text-black">Male</option>
+                    <option value="female" class="text-black">Female</option>
+                    <option value="other" class="text-black">Other</option>
+                </select>
+
+                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-white">
+                    ▼
+                </div>
+            </div>
+
             <input type="password" id="password" placeholder="Password"
                 class="w-full px-4 py-3 rounded-xl bg-transparent border border-gray-400 text-white placeholder-gray-300 focus:outline-none focus:border-pink-400"
                 required>
 
-            <select id="role"
-                class="w-full px-4 py-3 rounded-xl bg-transparent border border-gray-400 text-white focus:outline-none focus:border-pink-400"
-                required>
-                <option value="" class="text-black">Select Role</option>
-                <option value="employer" class="text-black">Employer</option>
-                <option value="worker" class="text-black">Worker</option>
-            </select>
+            <div class="relative">
+                <select id="role"
+                    class="w-full px-4 py-3 rounded-xl bg-[#4b3a6b] border border-gray-400 text-white focus:outline-none focus:border-pink-400 appearance-none"
+                    required>
+                    <option value="" class="text-black">Select Role</option>
+                    <option value="employer" class="text-black">Employer</option>
+                    <option value="worker" class="text-black">Worker</option>
+                </select>
+
+                <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-white">
+                    ▼
+                </div>
+            </div>
 
             <button type="submit"
                 class="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-xl font-semibold mt-2">
@@ -53,9 +86,34 @@
         document.getElementById("signupForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
+            const phone = document.getElementById("phone").value.trim();
+            const nid = document.getElementById("nid").value.trim();
+            const password = document.getElementById("password").value;
+            const msg = document.getElementById("msg");
+
+            if (!/^\d{11}$/.test(phone)) {
+                msg.innerHTML = "<span class='text-red-400'>Phone number must be exactly 11 digits.</span>";
+                return;
+            }
+
+            if (!/^\d{13}$/.test(nid)) {
+                msg.innerHTML = "<span class='text-red-400'>NID must be exactly 13 digits.</span>";
+                return;
+            }
+
+            const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{6,}$/;
+            if (!passwordRegex.test(password)) {
+                msg.innerHTML = "<span class='text-red-400'>Password must contain at least 1 capital letter, 1 number, and 1 special character.</span>";
+                return;
+            }
+
             const payload = {
                 username: document.getElementById("username").value,
-                password: document.getElementById("password").value,
+                phone: phone,
+                nid: nid,
+                address: document.getElementById("address").value,
+                gender: document.getElementById("gender").value,
+                password: password,
                 role: document.getElementById("role").value
             };
 
@@ -66,10 +124,9 @@
             });
 
             const data = await res.json();
-            const msg = document.getElementById("msg");
 
             if (res.ok) {
-msg.innerHTML = '<span class="text-white">Signup successful! Redirecting...</span>';
+                msg.innerHTML = '<span class="text-white">Signup successful! Redirecting...</span>';
                 setTimeout(() => window.location.href = "/login", 1200);
             } else {
                 msg.innerHTML = `<span class='text-red-400'>${data.error}</span>`;
