@@ -15,10 +15,6 @@ def has_role(*roles):
 
 
 def verify_user_password(user, password):
-    """
-    Supports both hashed passwords and older plain-text passwords.
-    If an old plain-text password matches, it upgrades it to hashed.
-    """
     if not user or not password:
         return False
 
@@ -89,7 +85,6 @@ def signup():
         if User.query.filter_by(username=username).first():
             return jsonify({"error": "Username already exists"}), 400
 
-        # Only check these if the columns exist in your model
         if hasattr(User, "phone"):
             existing_phone = User.query.filter_by(phone=phone).first()
             if existing_phone:
@@ -295,6 +290,73 @@ def add_worker():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to create worker profile: {str(e)}"}), 500
+
+@app.route("/update-worker")
+def update_worker_page():
+    if not is_logged_in():
+        return redirect("/login")
+
+    if not has_role("worker"):
+        return redirect("/")
+
+    worker = Worker.query.filter_by(user_id=session["user_id"]).first()
+    if not worker:
+        return redirect("/add-worker")
+
+    return render_template(
+        "update_worker.html",
+        username=session.get("username"),
+        role=session.get("role"),
+        worker=worker
+    )
+
+
+@app.route("/update_worker", methods=["POST"])
+def update_worker():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("worker"):
+        return jsonify({"error": "Only worker accounts can update worker profiles"}), 403
+
+    try:
+        worker = Worker.query.filter_by(user_id=session["user_id"]).first()
+        if not worker:
+            return jsonify({"error": "Worker profile not found"}), 404
+
+        data = request.get_json(silent=True) or request.form.to_dict() or {}
+
+        name = data.get("name", "").strip()
+        phone = data.get("phone", "").strip()
+        address = data.get("address", "").strip()
+        skills = data.get("skills", "").strip()
+        experience = data.get("experience", 0)
+
+        if not all([name, phone, address, skills]):
+            return jsonify({"error": "Missing required fields"}), 400
+
+        try:
+            experience = int(experience)
+        except (TypeError, ValueError):
+            experience = 0
+
+        worker.name = name
+        worker.phone = phone
+        worker.address = address
+        worker.skills = skills
+        worker.experience = experience
+        worker.risk_score = len([s for s in skills.split(",") if s.strip()]) * 10
+
+        db.session.commit()
+
+        return jsonify({
+            "message": "Profile updated successfully",
+            "redirect": "/worker-dashboard"
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to update worker profile: {str(e)}"}), 500
 
 
 @app.route("/workers", methods=["GET"])

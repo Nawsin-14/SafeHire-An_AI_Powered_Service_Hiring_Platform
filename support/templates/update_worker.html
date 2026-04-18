@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Worker Profile - SafeHire</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8] min-h-screen text-white">
+
+    <div class="max-w-3xl mx-auto py-12 px-6">
+        <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl">
+            <h1 class="text-3xl font-bold mb-2">Update Profile</h1>
+            <p class="text-white/70 mb-8">Edit your worker profile information</p>
+
+            <form id="updateWorkerForm" class="space-y-5">
+                <div>
+                    <label class="block mb-2 text-sm text-white/80">Full Name</label>
+                    <input type="text" id="name" value="{{ worker.name }}" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white outline-none" required>
+                </div>
+
+                <div>
+                    <label class="block mb-2 text-sm text-white/80">Phone</label>
+                    <input type="text" id="phone" value="{{ worker.phone }}" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white outline-none" required>
+                </div>
+
+                <div>
+                    <label class="block mb-2 text-sm text-white/80">Address</label>
+                    <input type="text" id="address" value="{{ worker.address }}" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white outline-none" required>
+                </div>
+
+                <div>
+                    <label class="block mb-2 text-sm text-white/80">Skills</label>
+                    <input type="text" id="skills" value="{{ worker.skills }}" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white outline-none" required>
+                </div>
+
+                <div>
+                    <label class="block mb-2 text-sm text-white/80">Experience (Years)</label>
+                    <input type="number" id="experience" value="{{ worker.experience }}" class="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white outline-none" required>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-xl font-semibold">
+                        Save Changes
+                    </button>
+                    <a href="/worker-dashboard" class="bg-white/10 hover:bg-white/20 px-6 py-3 rounded-xl font-semibold">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("updateWorkerForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+
+            const payload = {
+                name: document.getElementById("name").value,
+                phone: document.getElementById("phone").value,
+                address: document.getElementById("address").value,
+                skills: document.getElementById("skills").value,
+                experience: document.getElementById("experience").value
+            };
+
+            const res = await fetch("/update_worker", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                alert(data.message);
+                window.location.href = data.redirect || "/worker-dashboard";
+            } else {
+                alert(data.error || "Failed to update profile");
+            }
+        });
+    </script>
+</body>
+</html>
