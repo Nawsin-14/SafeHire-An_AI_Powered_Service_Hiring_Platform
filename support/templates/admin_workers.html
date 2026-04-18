@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SafeHire All Workers</title>
+  <title>SafeHire Admin - Manage Workers</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,18 +26,30 @@
 
 <body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
 
-  <header class="bg-white/10 backdrop-blur border-b border-white/10">
+  <header class="sticky top-0 z-50 bg-white/10 backdrop-blur border-b border-white/10">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-extrabold">SafeHire Admin</h1>
+      <div class="flex items-center gap-4">
+        <img
+          src="/static/images/SafeHire_logo.png"
+          alt="SafeHire Logo"
+          class="h-12 w-12 rounded-full object-cover border border-white/20 shadow-lg"
+        />
+        <div>
+          <h1 class="text-2xl font-extrabold leading-tight">SafeHire</h1>
+          <p class="text-white/70 text-sm leading-tight">AI Powered Hiring Platform</p>
+        </div>
       </div>
 
       <div class="flex items-center gap-3">
         <span class="text-sm text-white/70">
           Logged in as <span class="font-semibold text-white">{{ username }}</span>
         </span>
+        <a href="/admin-dashboard"
+           class="inline-flex items-center rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition">
+          Dashboard
+        </a>
         <a href="/logout"
-           class="inline-flex items-center rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 transition">
+           class="inline-flex items-center rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 transition">
           Logout
         </a>
       </div>
@@ -45,14 +57,16 @@
   </header>
 
   <main class="max-w-7xl mx-auto px-6 py-8">
-    <div class="bg-white/10 backdrop-blur border border-white/10 rounded-2xl shadow-lg overflow-hidden">
+    <section class="bg-white/10 backdrop-blur border border-white/10 rounded-3xl shadow-lg overflow-hidden">
       <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between">
         <div>
-          <h2 class="text-xl font-bold">Workers List</h2>
+          <p class="text-pink-300 text-sm font-semibold mb-1">Admin Panel</p>
+          <h2 class="text-2xl font-bold">Workers List</h2>
+          <p class="text-white/70 text-sm mt-1">Verify, reject, or keep workers pending.</p>
         </div>
 
-        <button onclick="loadWorkers()"
-                class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition">
+        <button id="refreshBtn"
+                class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition">
           Refresh
         </button>
       </div>
@@ -84,124 +98,36 @@
       </div>
 
       <div id="emptyState" class="hidden px-6 py-10 text-center text-white/70">
-        No workers found.
+        No workers found
       </div>
-    </div>
+    </section>
   </main>
 
-  <script>
-    function getStatusBadge(status) {
-      const value = (status || "").toLowerCase();
+  <div id="messageModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
+    <div class="w-full max-w-md bg-gradient-to-br from-[#24124D] to-[#6B21A8] border border-white/10 rounded-3xl shadow-2xl p-6 text-white">
+      <div class="flex items-start gap-4">
+        <div id="modalIcon"
+             class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+          ✓
+        </div>
 
-      if (value === "verified") {
-        return `<span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Verified</span>`;
-      }
+        <div class="flex-1">
+          <h2 id="modalTitle" class="text-2xl font-bold mb-2">Success</h2>
+          <p id="modalMessage" class="text-white/80 leading-relaxed">
+            Worker verification updated successfully
+          </p>
+        </div>
+      </div>
 
-      if (value === "rejected") {
-        return `<span class="inline-flex rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">Rejected</span>`;
-      }
+      <div class="mt-6 flex justify-end">
+        <button id="modalOkBtn"
+                class="bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-2xl font-semibold transition">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
 
-      return `<span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Pending</span>`;
-    }
-
-    async function updateWorkerStatus(workerId, status) {
-      try {
-        const res = await fetch(`/verify_worker/${workerId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ status: status })
-        });
-
-        const data = await res.json();
-
-        if (!res.ok) {
-          alert(data.error || "Failed to update worker status");
-          return;
-        }
-
-        alert(data.message || "Status updated successfully");
-        loadWorkers();
-      } catch (error) {
-        console.error(error);
-        alert("Something went wrong while updating worker status");
-      }
-    }
-
-    async function loadWorkers() {
-      const loading = document.getElementById("loading");
-      const table = document.getElementById("workersTable");
-      const tbody = document.getElementById("workersBody");
-      const emptyState = document.getElementById("emptyState");
-
-      loading.classList.remove("hidden");
-      table.classList.add("hidden");
-      emptyState.classList.add("hidden");
-      tbody.innerHTML = "";
-
-      try {
-        const response = await fetch("/workers");
-        const workers = await response.json();
-
-        loading.classList.add("hidden");
-
-        if (!Array.isArray(workers) || workers.length === 0) {
-          emptyState.classList.remove("hidden");
-          return;
-        }
-
-        table.classList.remove("hidden");
-
-        workers.forEach(worker => {
-          const row = document.createElement("tr");
-          row.className = "hover:bg-white/5";
-
-          row.innerHTML = `
-            <td class="px-6 py-4 text-sm">${worker.id ?? ""}</td>
-            <td class="px-6 py-4 text-sm font-semibold">${worker.name ?? ""}</td>
-            <td class="px-6 py-4 text-sm">${worker.nid ?? ""}</td>
-            <td class="px-6 py-4 text-sm">${worker.phone ?? ""}</td>
-            <td class="px-6 py-4 text-sm">${worker.address ?? ""}</td>
-            <td class="px-6 py-4 text-sm">${worker.skills ?? ""}</td>
-            <td class="px-6 py-4 text-sm text-center">${worker.experience ?? 0} years</td>
-            <td class="px-6 py-4 text-sm text-center">${worker.rating ?? 0}</td>
-            <td class="px-6 py-4 text-sm text-center">${worker.risk_score ?? 0}</td>
-            <td class="px-6 py-4 text-sm text-center">${getStatusBadge(worker.verification_status)}</td>
-            <td class="px-6 py-4 text-sm text-center">
-              <div class="flex justify-center gap-2">
-                <button
-                  onclick="updateWorkerStatus(${worker.id}, 'Verified')"
-                  class="bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-1 rounded text-xs text-white hover:opacity-90">
-                  Verify
-                </button>
-
-                <button
-                  onclick="updateWorkerStatus(${worker.id}, 'Rejected')"
-                  class="bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-1 rounded text-xs text-white opacity-80 hover:opacity-100">
-                  Reject
-                </button>
-
-                <button
-                  onclick="updateWorkerStatus(${worker.id}, 'Pending')"
-                  class="bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-1 rounded text-xs text-white opacity-60 hover:opacity-100">
-                  Pending
-                </button>
-              </div>
-            </td>
-          `;
-
-          tbody.appendChild(row);
-        });
-
-      } catch (error) {
-        console.error(error);
-        loading.textContent = "Failed to load workers.";
-      }
-    }
-
-    loadWorkers();
-  </script>
-
+  <script src="/static/js/verify_workers.js"></script>
 </body>
 </html>

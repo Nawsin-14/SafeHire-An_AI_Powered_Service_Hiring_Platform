@@ -1,121 +1,157 @@
-const verifyList = document.getElementById("verifyList");
+const loading = document.getElementById("loading");
+const workersTable = document.getElementById("workersTable");
+const workersBody = document.getElementById("workersBody");
+const emptyState = document.getElementById("emptyState");
+const refreshBtn = document.getElementById("refreshBtn");
 
-const pillClass = (status) => {
-  if (status === "Verified") {
-    return "bg-emerald-500/20 text-emerald-300 border border-emerald-400/20";
-  }
-  if (status === "Rejected") {
-    return "bg-rose-500/20 text-rose-300 border border-rose-400/20";
-  }
-  return "bg-amber-500/20 text-amber-300 border border-amber-400/20";
-};
+const modal = document.getElementById("messageModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalMessage = document.getElementById("modalMessage");
+const modalIcon = document.getElementById("modalIcon");
+const modalOkBtn = document.getElementById("modalOkBtn");
 
-const label = (status) => {
-  if (status === "Verified") return "✅ Verified";
-  if (status === "Rejected") return "❌ Rejected";
-  return "⏳ Pending";
-};
+function getStatusBadge(status) {
+  const value = (status || "").toLowerCase();
 
-function renderWorkers(workers) {
-  verifyList.innerHTML = "";
-
-  if (!Array.isArray(workers) || workers.length === 0) {
-    verifyList.innerHTML = `
-      <div class="col-span-full text-center py-10">
-        <p class="text-white font-medium">No workers found.</p>
-        <p class="text-sm text-gray-300 mt-1">Add workers first to verify them here.</p>
-      </div>
-    `;
-    return;
+  if (value === "verified") {
+    return `<span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Verified</span>`;
   }
 
-  workers.forEach((w) => {
-    verifyList.innerHTML += `
-      <div class="bg-white/5 border border-white/10 rounded-3xl p-5 backdrop-blur transition hover:bg-white/10 hover:shadow-xl">
-        <div class="flex items-start justify-between gap-3">
-          <div>
-            <p class="font-semibold text-white">${w.name}</p>
-            <p class="text-sm text-gray-300 mt-1">NID: ${w.nid}</p>
-            <p class="text-sm text-gray-300">Risk Score: ${w.risk_score}</p>
-            <p class="text-sm text-gray-300">Skills: ${w.skills}</p>
-          </div>
+  if (value === "rejected") {
+    return `<span class="inline-flex rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">Rejected</span>`;
+  }
 
-          <span class="px-3 py-1 rounded-full text-xs font-medium ${pillClass(w.verification_status)}">
-            ${label(w.verification_status)}
-          </span>
-        </div>
-
-        <div class="mt-4 flex flex-wrap gap-2">
-          <button
-            data-id="${w.id}"
-            data-status="Verified"
-            class="px-4 py-2 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-500 text-white text-sm font-medium hover:opacity-90 transition"
-          >
-            Verify
-          </button>
-
-          <button
-            data-id="${w.id}"
-            data-status="Pending"
-            class="px-4 py-2 rounded-2xl border border-white/10 bg-white/10 text-white text-sm font-medium hover:bg-white/15 transition"
-          >
-            Pending
-          </button>
-
-          <button
-            data-id="${w.id}"
-            data-status="Rejected"
-            class="px-4 py-2 rounded-2xl bg-rose-500/80 text-white text-sm font-medium hover:bg-rose-500 transition"
-          >
-            Reject
-          </button>
-        </div>
-      </div>
-    `;
-  });
+  return `<span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Pending</span>`;
 }
 
-async function loadWorkers() {
-  try {
-    const response = await fetch("/workers");
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const workers = await response.json();
-    renderWorkers(workers);
-  } catch (err) {
-    console.error(err);
-    verifyList.innerHTML = `
-      <div class="col-span-full text-center py-10">
-        <p class="text-rose-300 font-medium">Could not load workers.</p>
-      </div>
-    `;
+function showModal(type, message) {
+  if (type === "success") {
+    modalTitle.textContent = "Success";
+    modalMessage.textContent = message || "Worker verification updated successfully.";
+    modalIcon.textContent = "✓";
+    modalIcon.className =
+      "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30";
+  } else {
+    modalTitle.textContent = "Error";
+    modalMessage.textContent = message || "Something went wrong.";
+    modalIcon.textContent = "!";
+    modalIcon.className =
+      "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-rose-500/20 text-rose-300 border border-rose-400/30";
   }
+
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
 }
 
-verifyList.addEventListener("click", async (e) => {
-  const btn = e.target.closest("button");
-  if (!btn) return;
+function closeModal() {
+  modal.classList.remove("flex");
+  modal.classList.add("hidden");
+}
 
+modalOkBtn.addEventListener("click", closeModal);
+
+modal.addEventListener("click", function (e) {
+  if (e.target === modal) {
+    closeModal();
+  }
+});
+
+async function updateWorkerStatus(workerId, status) {
   try {
-    const response = await fetch(`/verify_worker/${btn.dataset.id}`, {
+    const res = await fetch(`/verify_worker/${workerId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ status: btn.dataset.status })
+      body: JSON.stringify({ status })
     });
 
-    const result = await response.json();
+    const data = await res.json();
 
-    if (!response.ok) {
-      throw new Error(result.error || "Failed to update worker status");
+    if (!res.ok) {
+      showModal("error", data.error || "Failed to update worker status");
+      return;
     }
 
     await loadWorkers();
-  } catch (err) {
-    console.error(err);
-    alert(err.message || "Could not update worker status");
+    showModal("success", data.message || "Worker verification updated successfully");
+  } catch (error) {
+    console.error(error);
+    showModal("error", "Something went wrong while updating worker status");
   }
-});
+}
+
+async function loadWorkers() {
+  loading.classList.remove("hidden");
+  workersTable.classList.add("hidden");
+  emptyState.classList.add("hidden");
+  workersBody.innerHTML = "";
+
+  try {
+    const response = await fetch("/workers");
+    const workers = await response.json();
+
+    loading.classList.add("hidden");
+
+    if (!response.ok) {
+      throw new Error(workers.error || `HTTP ${response.status}`);
+    }
+
+    if (!Array.isArray(workers) || workers.length === 0) {
+      emptyState.classList.remove("hidden");
+      return;
+    }
+
+    workersTable.classList.remove("hidden");
+
+    workers.forEach((worker) => {
+      const row = document.createElement("tr");
+      row.className = "hover:bg-white/5";
+
+      row.innerHTML = `
+        <td class="px-6 py-4 text-sm">${worker.id ?? ""}</td>
+        <td class="px-6 py-4 text-sm font-semibold">${worker.name ?? ""}</td>
+        <td class="px-6 py-4 text-sm">${worker.nid ?? ""}</td>
+        <td class="px-6 py-4 text-sm">${worker.phone ?? ""}</td>
+        <td class="px-6 py-4 text-sm">${worker.address ?? ""}</td>
+        <td class="px-6 py-4 text-sm">${worker.skills ?? ""}</td>
+        <td class="px-6 py-4 text-sm text-center">${worker.experience ?? 0} years</td>
+        <td class="px-6 py-4 text-sm text-center">${worker.rating ?? 0}</td>
+        <td class="px-6 py-4 text-sm text-center">${worker.risk_score ?? 0}</td>
+        <td class="px-6 py-4 text-sm text-center">${getStatusBadge(worker.verification_status)}</td>
+        <td class="px-6 py-4 text-sm text-center">
+          <div class="flex justify-center gap-2 flex-wrap">
+            <button
+              onclick="updateWorkerStatus(${worker.id}, 'Verified')"
+              class="bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-1 rounded text-xs text-white hover:opacity-90 transition">
+              Verify
+            </button>
+
+            <button
+              onclick="updateWorkerStatus(${worker.id}, 'Rejected')"
+              class="bg-rose-500/90 px-3 py-1 rounded text-xs text-white hover:bg-rose-500 transition">
+              Reject
+            </button>
+
+            <button
+              onclick="updateWorkerStatus(${worker.id}, 'Pending')"
+              class="bg-white/10 border border-white/10 px-3 py-1 rounded text-xs text-white hover:bg-white/20 transition">
+              Pending
+            </button>
+          </div>
+        </td>
+      `;
+
+      workersBody.appendChild(row);
+    });
+  } catch (error) {
+    console.error(error);
+    loading.textContent = "Failed to load workers.";
+  }
+}
+
+refreshBtn.addEventListener("click", loadWorkers);
+
+window.updateWorkerStatus = updateWorkerStatus;
 
 loadWorkers();
