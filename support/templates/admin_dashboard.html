@@ -41,9 +41,8 @@
 
     <main class="max-w-6xl mx-auto px-6 py-10">
         <section class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl mb-10">
-            <p class="text-pink-300 text-lg font-semibold mb-2">Admin Panel</p>
-            <h2 class="text-5xl font-extrabold mb-3">Welcome</h2>
-            <p class="text-white/90 text-3xl font-semibold">{{ username }}</p>
+            <p class="text-pink-500 text-lg font-semibold mb-2">Admin Panel</p>
+            <h2 class="text-3xl font-extrabold mb-3">Welcome back, {{ username }}!</h2>
         </section>
 
         <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
@@ -72,20 +71,22 @@
             <h3 class="text-3xl font-extrabold mb-6">Quick Actions</h3>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                <a href="/admin-workers" class="block bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
-                    <h4 class="text-2xl font-bold mb-2">Manage Workers</h4>
-                    <p class="text-white/70 text-base">Verify, review, and manage all worker profiles.</p>
-                </a>
 
-                <a href="/jobs" class="block bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
-                    <h4 class="text-2xl font-bold mb-2">View Jobs</h4>
-                    <p class="text-white/70 text-base">Browse all posted jobs and hiring activity.</p>
-                </a>
+              <a href="/admin-workers"
+               class="flex items-center justify-center text-center bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
+               <h4 class="text-2xl font-bold">Manage Workers</h4>
+              </a>
 
-                <a href="/transactions" class="block bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
-                    <h4 class="text-2xl font-bold mb-2">Transactions</h4>
-                    <p class="text-white/70 text-base">Track all payments and transaction history.</p>
-                </a>
+              <a href="/jobs"
+               class="flex items-center justify-center text-center bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
+               <h4 class="text-2xl font-bold">View Jobs</h4>
+              </a>
+
+              <a href="/transactions"
+               class="flex items-center justify-center text-center bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
+               <h4 class="text-2xl font-bold">Transactions</h4>
+              </a>
+
             </div>
         </section>
     </main>
