@@ -17,9 +17,13 @@
 <body class="bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8] min-h-screen text-white">
 
     <header class="sticky top-0 z-50 bg-white/10 backdrop-blur border-b border-white/10">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="SafeHire Logo" class="w-14 h-14 rounded-full object-cover border border-white/20 shadow-lg">
+                <img
+                    src="/static/images/SafeHire_logo.png"
+                    alt="SafeHire Logo"
+                    class="h-12 w-12 rounded-full object-cover border border-white/20 shadow-lg"
+                />
                 <div>
                     <h1 class="text-2xl font-extrabold leading-tight">SafeHire</h1>
                     <p class="text-white/70 text-sm leading-tight">AI Powered Hiring Platform</p>
@@ -35,52 +39,52 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-6 py-10">
+    <main class="max-w-6xl mx-auto px-6 py-10">
         <section class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl mb-10">
             <p class="text-pink-300 text-lg font-semibold mb-2">Admin Panel</p>
             <h2 class="text-5xl font-extrabold mb-3">Welcome</h2>
-            <p class="text-white/85 text-2xl font-semibold">{{ username }}</p>
+            <p class="text-white/90 text-3xl font-semibold">{{ username }}</p>
         </section>
 
-        <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mb-12">
-            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl">
+        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
+            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[150px]">
                 <p class="text-white/70 text-lg mb-3">Total Workers</p>
-                <h3 class="text-5xl font-extrabold">{{ total_workers }}</h3>
+                <h3 class="text-4xl font-extrabold">{{ total_workers }}</h3>
             </div>
 
-            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl">
+            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[150px]">
                 <p class="text-white/70 text-lg mb-3">Total Employers</p>
-                <h3 class="text-5xl font-extrabold">{{ total_employers }}</h3>
+                <h3 class="text-4xl font-extrabold">{{ total_employers }}</h3>
             </div>
 
-            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl">
+            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[150px]">
                 <p class="text-white/70 text-lg mb-3">Total Jobs</p>
-                <h3 class="text-5xl font-extrabold">{{ total_jobs }}</h3>
+                <h3 class="text-4xl font-extrabold">{{ total_jobs }}</h3>
             </div>
 
-            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl">
+            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[150px]">
                 <p class="text-white/70 text-lg mb-3">Total Transactions</p>
-                <h3 class="text-5xl font-extrabold">{{ total_transactions }}</h3>
+                <h3 class="text-4xl font-extrabold">{{ total_transactions }}</h3>
             </div>
         </section>
 
         <section>
             <h3 class="text-3xl font-extrabold mb-6">Quick Actions</h3>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                <a href="/admin-workers" class="block bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <a href="/admin-workers" class="block bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
                     <h4 class="text-2xl font-bold mb-2">Manage Workers</h4>
-                    <p class="text-white/70">Verify, review, and manage all worker profiles.</p>
+                    <p class="text-white/70 text-base">Verify, review, and manage all worker profiles.</p>
                 </a>
 
-                <a href="/jobs" class="block bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200">
+                <a href="/jobs" class="block bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
                     <h4 class="text-2xl font-bold mb-2">View Jobs</h4>
-                    <p class="text-white/70">Browse all posted jobs and hiring activity.</p>
+                    <p class="text-white/70 text-base">Browse all posted jobs and hiring activity.</p>
                 </a>
 
-                <a href="/transactions" class="block bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200">
+                <a href="/transactions" class="block bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
                     <h4 class="text-2xl font-bold mb-2">Transactions</h4>
-                    <p class="text-white/70">Track all payments and transaction history.</p>
+                    <p class="text-white/70 text-base">Track all payments and transaction history.</p>
                 </a>
             </div>
         </section>
