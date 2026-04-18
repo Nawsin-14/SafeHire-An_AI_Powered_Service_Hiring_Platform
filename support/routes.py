@@ -551,7 +551,10 @@ def jobs_api():
     if has_role("admin"):
         jobs = Job.query.order_by(Job.id.desc()).all()
     else:
-        jobs = Job.query.filter_by(employer_id=session["user_id"]).order_by(Job.id.desc()).all()
+        jobs = Job.query.filter(
+            Job.employer_id == session["user_id"],
+            Job.status != "completed"
+        ).order_by(Job.id.desc()).all()
 
     result = []
     for job in jobs:
@@ -644,7 +647,10 @@ def job_matches():
     if has_role("admin"):
         jobs = Job.query.order_by(Job.id.desc()).all()
     else:
-        jobs = Job.query.filter_by(employer_id=session["user_id"]).order_by(Job.id.desc()).all()
+        jobs = Job.query.filter(
+            Job.employer_id == session["user_id"],
+            Job.status != "completed"
+        ).order_by(Job.id.desc()).all()
 
     workers = Worker.query.all()
     result = []
