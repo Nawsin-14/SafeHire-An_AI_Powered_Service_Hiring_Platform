@@ -77,7 +77,9 @@
             <th class="px-6 py-4 text-left">Job</th>
             <th class="px-6 py-4 text-center">Amount</th>
             <th class="px-6 py-4 text-center">Status</th>
+              {% if role != 'admin' %}
             <th class="px-6 py-4 text-center">Action</th>
+             {% endif %}
           </tr>
         </thead>
 
@@ -208,10 +210,6 @@ function getStatusBadge(status) {
 }
 
 function getActionButtons(t) {
-  if (ROLE === "admin") {
-    return ""; 
-  }
-
   const s = (t.status || "").toLowerCase();
 
   if (s === "assigned") {
@@ -272,7 +270,11 @@ async function loadTransactions() {
             BDT ${Number(t.amount || 0).toLocaleString()}
           </td>
           <td class="px-6 py-4 text-center">${getStatusBadge(t.status)}</td>
-          <td class="px-6 py-4 text-center">${getActionButtons(t)}</td>
+            ${ROLE !== "admin" ? `
+          <td class="px-6 py-4 text-center">
+            ${getActionButtons(t)}
+          </td>
+            ` : ""}
         </tr>
       `;
     });
