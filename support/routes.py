@@ -1074,7 +1074,7 @@ def add_review():
             employer_id=session["user_id"],
             worker_id=worker_id,
             transaction_id=transaction_id,
-            rating=int(round(rating)),
+            rating=round(rating, 1),
             comment=comment
         )
 

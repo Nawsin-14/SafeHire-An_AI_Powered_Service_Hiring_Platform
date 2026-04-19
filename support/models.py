@@ -120,7 +120,7 @@ class Review(db.Model):
     worker_id = db.Column(db.Integer, db.ForeignKey('worker.id'), nullable=False)
     transaction_id = db.Column(db.Integer, db.ForeignKey('hire_transaction.id'), nullable=False)
 
-    rating = db.Column(db.Integer, nullable=False)
+    rating = db.Column(db.Float, nullable=False)
     comment = db.Column(db.Text, nullable=False)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
