@@ -13,8 +13,11 @@ CSE299 – Junior Design Project
  <li> Lack of worker verification 
  <li> Risk of fraud or identity issues 
  <li> No transparent hiring records 
+<<<<<<< HEAD
 
 SafeHire addresses these problems by providing:
+=======
+>>>>>>> 0aba6027d4f0929d7dbd3f83e0a11038e7014ac3
 
  <li> Worker registration with identity details
  <li> Risk score estimation (AI-assisted logic )
@@ -69,8 +72,12 @@ SafeHire addresses these problems by providing:
   --- 
 ## How To Run The Project
  ### Clone the repository
+<<<<<<< HEAD
 
 git clone "https://github.com/diyanazia/SafeHire-An_AI_Powered_Service_Hiring_Platform.git"
+=======
+ git clone "https://github.com/diyanazia/SafeHire-An_AI_Powered_Service_Hiring_Platform.git"
+>>>>>>> 0aba6027d4f0929d7dbd3f83e0a11038e7014ac3
 ---
 ### Install Dependencies
     python -m pip install -r requirements.txt
@@ -83,4 +90,8 @@ python main.py
 ---
 ## Contributing Members 
 <li> Nazia Faruque Diya
+<<<<<<< HEAD
 <li> Afridur Rahman Khan Mim
+=======
+<li> Afridur Rahman Khan Mim
+>>>>>>> 0aba6027d4f0929d7dbd3f83e0a11038e7014ac3
