@@ -8,9 +8,9 @@ CSE299 – Junior Design Project
 ---
  ## Project Overview 
  Traditional service hiring often suffers from: 
- <li>• Lack of worker verification 
- <li>• Risk of fraud or identity issues 
- <li>• No transparent hiring records 
+ <li> Lack of worker verification 
+ <li> Risk of fraud or identity issues 
+ <li> No transparent hiring records 
 
  <li>SafeHire addresses these problems by providing:
  <li> Worker registration with identity details
@@ -55,7 +55,7 @@ CSE299 – Junior Design Project
   - Flask 
   - Flask-SQLAlchemy 
   - Flask-CORS 
-###  Database 
+  ###  Database 
   - SQLite 
   ### Frontend 
   - HTML 
@@ -65,8 +65,7 @@ CSE299 – Junior Design Project
   --- 
 ## How To Run The Project
  ### Clone the repository
-
-   git clone "https://github.com/diyanazia/SafeHire-An_AI_Powered_Service_Hiring_Platform.git"
+ git clone "https://github.com/diyanazia/SafeHire-An_AI_Powered_Service_Hiring_Platform.git"
 ---
 ### Install Dependencies
     python -m pip install -r requirements.txt
@@ -78,5 +77,5 @@ CSE299 – Junior Design Project
    "http://127.0.0.1:5000"
 ---
 ## Contributing Members 
-<li> 1.Nazia Faruque Diya
-<li> 2.Afridur Rahman Khan Mim
+<li> Nazia Faruque Diya
+<li> Afridur Rahman Khan Mim
