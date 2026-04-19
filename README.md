@@ -1,5 +1,7 @@
-## SafeHire – AI Powered Service Hiring Platform SafeHire is a secure and intelligent web based service hiring platform designed to connect employers with verified workers. 
+### SafeHire – AI Powered Service Hiring Platform SafeHire is a secure and intelligent web based service hiring platform designed to connect employers with verified workers. 
+
 ---
+
 The system integrates structured worker registration AI-assisted matching logic risk assessment transparent hiring workflows to ensure safe, reliable, and efficient hiring decisions. 
 The platform demonstrates how AI-assisted verification, structured worker data, and transparent hiring transactions can improve trust in digital service marketplaces. 
 --- 
@@ -8,11 +10,12 @@ CSE299 – Junior Design Project
 ---
  ## Project Overview 
  Traditional service hiring often suffers from: 
- <li>• Lack of worker verification 
- <li>• Risk of fraud or identity issues 
- <li>• No transparent hiring records 
+ <li> Lack of worker verification 
+ <li> Risk of fraud or identity issues 
+ <li> No transparent hiring records 
 
- <li>SafeHire addresses these problems by providing:
+SafeHire addresses these problems by providing:
+
  <li> Worker registration with identity details
  <li> Risk score estimation (AI-assisted logic )
  <li> Worker verification system 
@@ -21,6 +24,7 @@ CSE299 – Junior Design Project
  <li> Transparent transaction history
  <li> Review and rating system
 
+ ---
  ## Current Features (Implemented So Far) 
 
  ### Backend (Flask + SQLite) 
@@ -55,7 +59,7 @@ CSE299 – Junior Design Project
   - Flask 
   - Flask-SQLAlchemy 
   - Flask-CORS 
-###  Database 
+  ###  Database 
   - SQLite 
   ### Frontend 
   - HTML 
@@ -66,17 +70,17 @@ CSE299 – Junior Design Project
 ## How To Run The Project
  ### Clone the repository
 
-   git clone "https://github.com/diyanazia/SafeHire-An_AI_Powered_Service_Hiring_Platform.git"
+git clone "https://github.com/diyanazia/SafeHire-An_AI_Powered_Service_Hiring_Platform.git"
 ---
 ### Install Dependencies
     python -m pip install -r requirements.txt
 ---
 ### Run the project
-   python main.py
+python main.py
 ---
 ### Open in browser
-   "http://127.0.0.1:5000"
+"http://127.0.0.1:5000"
 ---
 ## Contributing Members 
-<li> 1.Nazia Faruque Diya
-<li> 2.Afridur Rahman Khan Mim
+<li> Nazia Faruque Diya
+<li> Afridur Rahman Khan Mim
