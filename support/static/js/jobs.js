@@ -31,13 +31,17 @@ function closeModal() {
   modal.classList.add("hidden");
 }
 
-modalOkBtn.addEventListener("click", closeModal);
+if (modalOkBtn) {
+  modalOkBtn.addEventListener("click", closeModal);
+}
 
-modal.addEventListener("click", function (e) {
-  if (e.target === modal) {
-    closeModal();
-  }
-});
+if (modal) {
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+}
 
 function getJobStatusBadge(status) {
   const value = (status || "").toLowerCase();
@@ -88,11 +92,13 @@ function getEmployerViewCard(job, workers) {
             <p class="text-sm text-gray-300 mt-1">${w.skills}</p>
             <p class="text-sm text-white/70 mt-1">Experience: ${w.experience ?? 0} years</p>
             <p class="text-sm mt-1">${renderRating(w.rating)}</p>
+            <p class="text-xs text-pink-300 mt-2 font-medium">AI Match Score: ${w.score}</p>
           </div>
 
           <div class="text-right">
-            <p class="text-pink-400 font-bold text-lg">${w.score}</p>
-            <p class="text-xs text-white/60">Match Score</p>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-400/20">
+              Applicant
+            </span>
           </div>
         </div>
 
@@ -115,7 +121,11 @@ function getEmployerViewCard(job, workers) {
         }
       </div>
     `).join("")
-    : `<p class="text-gray-400 text-sm">No match found</p>`;
+    : `
+      <div class="bg-white/5 p-4 rounded-xl border border-white/10">
+        <p class="text-gray-300 text-sm">No verified applicants yet for this job.</p>
+      </div>
+    `;
 
   return `
     <div class="bg-white/10 backdrop-blur p-5 rounded-2xl border border-white/10 shadow-lg">
@@ -127,7 +137,10 @@ function getEmployerViewCard(job, workers) {
         ${getJobStatusBadge(job.status)}
       </div>
 
-      <p class="mt-3 text-lg font-semibold">BDT ${job.budget}</p>
+      <div class="mt-3 flex items-center justify-between gap-4 flex-wrap">
+        <p class="text-lg font-semibold">BDT ${job.budget}</p>
+        <p class="text-sm text-white/70">Applicants: ${job.applicant_count ?? 0}</p>
+      </div>
 
       <div class="mt-4 space-y-3">
         ${workerHTML}

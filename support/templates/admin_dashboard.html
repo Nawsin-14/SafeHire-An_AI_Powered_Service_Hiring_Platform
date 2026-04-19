@@ -4,20 +4,30 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard - SafeHire</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Inter", "ui-sans-serif", "system-ui"]
+                    }
+                }
+            }
         }
-    </style>
+    </script>
 </head>
-<body class="bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8] min-h-screen text-white">
+
+<body class="bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8] min-h-screen text-white font-sans">
 
     <header class="sticky top-0 z-50 bg-white/10 backdrop-blur border-b border-white/10">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
             <div class="flex items-center gap-4">
                 <img
                     src="/static/images/SafeHire_logo.png"
@@ -30,9 +40,11 @@
                 </div>
             </div>
 
-            <nav class="flex items-center gap-4">
-                <a href="/" class="text-white/80 hover:text-white font-medium transition">Home</a>
-                <a href="/logout" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white font-semibold px-6 py-3 rounded-2xl transition">
+            <nav class="flex items-center gap-3">
+                <a href="/" class="text-white/80 hover:text-white font-medium transition">
+                    Home
+                </a>
+                <a href="/logout" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white font-semibold px-5 py-2.5 rounded-2xl transition">
                     Logout
                 </a>
             </nav>
@@ -40,30 +52,57 @@
     </header>
 
     <main class="max-w-6xl mx-auto px-6 py-10">
-        <section class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl mb-10">
-            <p class="text-pink-500 text-lg font-semibold mb-2">Admin Panel</p>
-            <h2 class="text-3xl font-extrabold mb-3">Welcome back, {{ username }}!</h2>
+        <section class="relative overflow-hidden bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-8 shadow-2xl mb-10">
+            <div class="absolute -top-10 -right-10 h-40 w-40 bg-pink-500/20 blur-3xl rounded-full"></div>
+            <div class="absolute -bottom-10 -left-10 h-40 w-40 bg-purple-500/20 blur-3xl rounded-full"></div>
+
+            <div class="relative z-10">
+                <p class="text-pink-300 text-sm font-semibold mb-2 uppercase tracking-wide">Admin Panel</p>
+                <h2 class="text-3xl md:text-4xl font-extrabold mb-3">Welcome back, {{ username }}!</h2>
+            </div>
         </section>
 
         <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
-            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[150px]">
-                <p class="text-white/70 text-lg mb-3">Total Workers</p>
-                <h3 class="text-4xl font-extrabold">{{ total_workers }}</h3>
+            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[160px] flex flex-col justify-between">
+                <div>
+                    <p class="text-white/70 text-base mb-3">Total Workers</p>
+                    <h3 class="text-4xl font-extrabold">{{ total_workers }}</h3>
+                </div>
+                <p class="text-sm text-emerald-300 mt-4">Registered worker profiles</p>
             </div>
 
-            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[150px]">
-                <p class="text-white/70 text-lg mb-3">Total Employers</p>
-                <h3 class="text-4xl font-extrabold">{{ total_employers }}</h3>
+            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[160px] flex flex-col justify-between">
+                <div>
+                    <p class="text-white/70 text-base mb-3">Total Employers</p>
+                    <h3 class="text-4xl font-extrabold">{{ total_employers }}</h3>
+                </div>
+                <p class="text-sm text-pink-300 mt-4">Employer accounts on platform</p>
             </div>
 
-            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[150px]">
-                <p class="text-white/70 text-lg mb-3">Total Jobs</p>
-                <h3 class="text-4xl font-extrabold">{{ total_jobs }}</h3>
+            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[160px] flex flex-col justify-between">
+                <div>
+                    <p class="text-white/70 text-base mb-3">Total Jobs</p>
+                    <h3 class="text-4xl font-extrabold">{{ total_jobs }}</h3>
+                </div>
+                <p class="text-sm text-purple-200 mt-4">Jobs posted by employers</p>
             </div>
 
-            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[150px]">
-                <p class="text-white/70 text-lg mb-3">Total Transactions</p>
-                <h3 class="text-4xl font-extrabold">{{ total_transactions }}</h3>
+            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[160px] flex flex-col justify-between">
+                <div>
+                    <p class="text-white/70 text-base mb-3">Total Transactions</p>
+                    <h3 class="text-4xl font-extrabold">{{ total_transactions }}</h3>
+                </div>
+                <p class="text-sm text-blue-200 mt-4">Hiring and payment records</p>
+            </div>
+        </section>
+
+        <section class="mb-12">
+            <div class="rounded-3xl bg-gradient-to-r from-pink-500/20 to-purple-500/20 border border-white/10 p-6 shadow-xl">
+                <p class="text-sm text-pink-200 font-semibold uppercase tracking-wide">Platform Insight</p>
+                <h3 class="text-2xl font-bold mt-2">Admin control with AI-powered hiring workflow</h3>
+                <p class="text-white/75 mt-3 max-w-3xl">
+                    SafeHire combines worker registration, verification, smart job matching, secure hiring, and transaction tracking in one place for easier platform management.
+                </p>
             </div>
         </section>
 
@@ -72,23 +111,51 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
 
-              <a href="/admin-workers"
-               class="flex items-center justify-center text-center bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
-               <h4 class="text-2xl font-bold">Manage Workers</h4>
-              </a>
+                <a href="/admin-workers"
+                   class="group flex flex-col justify-between bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[180px]">
+                    <div>
+                        <p class="text-sm text-white/60 mb-2">Verification</p>
+                        <h4 class="text-2xl font-bold">Manage Workers</h4>
+                        <p class="text-white/70 mt-3">
+                            View all worker profiles and approve, reject, or update verification status.
+                        </p>
+                    </div>
+                    <span class="mt-5 text-pink-300 font-semibold group-hover:text-pink-200 transition">
+                        Open →
+                    </span>
+                </a>
 
-              <a href="/jobs"
-               class="flex items-center justify-center text-center bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
-               <h4 class="text-2xl font-bold">View Jobs</h4>
-              </a>
+                <a href="/jobs"
+                   class="group flex flex-col justify-between bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[180px]">
+                    <div>
+                        <p class="text-sm text-white/60 mb-2">Monitoring</p>
+                        <h4 class="text-2xl font-bold">View Jobs</h4>
+                        <p class="text-white/70 mt-3">
+                            Review all jobs posted on the platform along with their current status.
+                        </p>
+                    </div>
+                    <span class="mt-5 text-pink-300 font-semibold group-hover:text-pink-200 transition">
+                        Open →
+                    </span>
+                </a>
 
-              <a href="/transactions"
-               class="flex items-center justify-center text-center bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[150px]">
-               <h4 class="text-2xl font-bold">Transactions</h4>
-              </a>
+                <a href="/transactions"
+                   class="group flex flex-col justify-between bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[180px]">
+                    <div>
+                        <p class="text-sm text-white/60 mb-2">Finance</p>
+                        <h4 class="text-2xl font-bold">Transactions</h4>
+                        <p class="text-white/70 mt-3">
+                            Track completed and assigned hiring transactions across the platform.
+                        </p>
+                    </div>
+                    <span class="mt-5 text-pink-300 font-semibold group-hover:text-pink-200 transition">
+                        Open →
+                    </span>
+                </a>
 
             </div>
         </section>
     </main>
+
 </body>
 </html>

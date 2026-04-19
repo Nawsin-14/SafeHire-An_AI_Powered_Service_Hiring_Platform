@@ -41,8 +41,8 @@ class Worker(db.Model):
     experience = db.Column(db.Integer, default=0)
     rating = db.Column(db.Float, default=0.0)
 
-
     reviews = db.relationship("Review", backref="worker", lazy=True)
+    applications = db.relationship("JobApplication", backref="worker", lazy=True)
 
     def to_dict(self):
         return {
@@ -60,7 +60,6 @@ class Worker(db.Model):
         }
 
 
-
 class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     employer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -73,6 +72,8 @@ class Job(db.Model):
 
     status = db.Column(db.String(20), default="open")
     assigned_worker_id = db.Column(db.Integer, db.ForeignKey('worker.id'), nullable=True)
+
+    applications = db.relationship("JobApplication", backref="job", lazy=True)
 
     def to_dict(self):
         return {
@@ -112,7 +113,6 @@ class HireTransaction(db.Model):
         }
 
 
-
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
 
@@ -133,5 +133,28 @@ class Review(db.Model):
             "transaction_id": self.transaction_id,
             "rating": self.rating,
             "comment": self.comment,
+            "created_at": str(self.created_at)
+        }
+
+
+class JobApplication(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    worker_id = db.Column(db.Integer, db.ForeignKey('worker.id'), nullable=False)
+    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+
+    status = db.Column(db.String(20), default="applied")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    __table_args__ = (
+        db.UniqueConstraint('worker_id', 'job_id', name='unique_worker_job_application'),
+    )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "worker_id": self.worker_id,
+            "job_id": self.job_id,
+            "status": self.status,
             "created_at": str(self.created_at)
         }

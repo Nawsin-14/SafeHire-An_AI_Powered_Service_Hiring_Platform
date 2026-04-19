@@ -2,7 +2,7 @@ from flask import jsonify, render_template, redirect, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from support.app import app
-from support.models import db, Worker, Job, HireTransaction, User, Review
+from support.models import db, Worker, Job, HireTransaction, User, Review, JobApplication
 from support.services.matching import calculate_match_score
 
 
@@ -252,6 +252,130 @@ def worker_dashboard():
         reviews=reviews,
         total_earnings=total_earnings
     )
+
+
+@app.route("/worker_jobs", methods=["GET"])
+def worker_jobs():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("worker"):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    worker = Worker.query.filter_by(user_id=session["user_id"]).first()
+    if not worker:
+        return jsonify([]), 200
+
+    open_jobs = Job.query.filter_by(status="open").order_by(Job.id.desc()).all()
+
+    applications = JobApplication.query.filter_by(worker_id=worker.id).all()
+    applied_job_ids = {app_item.job_id for app_item in applications}
+
+    matched_jobs = []
+
+    for job in open_jobs:
+        score = calculate_match_score(worker, job)
+
+        if score > 0:
+            matched_jobs.append({
+                "id": job.id,
+                "title": job.title,
+                "category": job.category,
+                "location": job.location,
+                "budget": job.budget,
+                "description": job.description or "",
+                "score": score,
+                "already_applied": job.id in applied_job_ids
+            })
+
+    matched_jobs.sort(key=lambda x: x["score"], reverse=True)
+
+    return jsonify(matched_jobs), 200
+
+
+@app.route("/apply_job", methods=["POST"])
+def apply_job():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("worker"):
+        return jsonify({"error": "Only workers can apply to jobs"}), 403
+
+    try:
+        worker = Worker.query.filter_by(user_id=session["user_id"]).first()
+        if not worker:
+            return jsonify({"error": "Worker profile not found"}), 404
+
+        data = request.get_json(silent=True) or request.form.to_dict() or {}
+        job_id = data.get("job_id")
+
+        if not job_id:
+            return jsonify({"error": "Job ID is required"}), 400
+
+        job = Job.query.get(job_id)
+        if not job:
+            return jsonify({"error": "Job not found"}), 404
+
+        if (job.status or "").lower() != "open":
+            return jsonify({"error": "This job is no longer open"}), 400
+
+        existing_application = JobApplication.query.filter_by(
+            worker_id=worker.id,
+            job_id=job.id
+        ).first()
+
+        if existing_application:
+            return jsonify({"error": "You have already applied to this job"}), 400
+
+        new_application = JobApplication(
+            worker_id=worker.id,
+            job_id=job.id,
+            status="applied"
+        )
+
+        db.session.add(new_application)
+        db.session.commit()
+
+        return jsonify({"message": "Applied successfully"}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"Failed to apply: {str(e)}"}), 500
+
+
+@app.route("/my_applications", methods=["GET"])
+def my_applications():
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("worker"):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    worker = Worker.query.filter_by(user_id=session["user_id"]).first()
+    if not worker:
+        return jsonify([]), 200
+
+    applications = JobApplication.query.filter_by(worker_id=worker.id).order_by(JobApplication.id.desc()).all()
+
+    result = []
+    for app_item in applications:
+        job = Job.query.get(app_item.job_id)
+        if not job:
+            continue
+
+        result.append({
+            "application_id": app_item.id,
+            "status": app_item.status,
+            "job_id": job.id,
+            "title": job.title,
+            "category": job.category,
+            "location": job.location,
+            "budget": job.budget,
+            "description": job.description or "",
+            "job_status": job.status
+        })
+
+    return jsonify(result), 200
 
 
 @app.route("/add-worker")
@@ -564,11 +688,53 @@ def jobs_api():
             "category": job.category,
             "location": job.location,
             "budget": job.budget,
-            "description": job.description,
+            "description": job.description or "",
             "status": job.status,
             "assigned_worker_id": job.assigned_worker_id,
             "employer_id": job.employer_id
         })
+
+    return jsonify(result), 200
+
+
+@app.route("/job_applicants/<int:job_id>", methods=["GET"])
+def job_applicants(job_id):
+    if not is_logged_in():
+        return jsonify({"error": "Login required"}), 401
+
+    if not has_role("employer"):
+        return jsonify({"error": "Unauthorized"}), 403
+
+    job = Job.query.get(job_id)
+    if not job:
+        return jsonify({"error": "Job not found"}), 404
+
+    if job.employer_id != session["user_id"]:
+        return jsonify({"error": "You can only view applicants for your own jobs"}), 403
+
+    applications = JobApplication.query.filter_by(job_id=job_id).order_by(JobApplication.id.desc()).all()
+
+    result = []
+    for app_item in applications:
+        worker = Worker.query.get(app_item.worker_id)
+        if not worker:
+            continue
+
+        score = calculate_match_score(worker, job)
+
+        result.append({
+            "application_id": app_item.id,
+            "worker_id": worker.id,
+            "worker_name": worker.name,
+            "skills": worker.skills,
+            "experience": worker.experience,
+            "rating": worker.rating,
+            "verification_status": worker.verification_status,
+            "status": app_item.status,
+            "score": score
+        })
+
+    result.sort(key=lambda x: x["score"], reverse=True)
 
     return jsonify(result), 200
 
@@ -652,13 +818,17 @@ def job_matches():
             Job.status != "completed"
         ).order_by(Job.id.desc()).all()
 
-    workers = Worker.query.all()
     result = []
 
     for job in jobs:
+        applications = JobApplication.query.filter_by(job_id=job.id).all()
         matches = []
 
-        for worker in workers:
+        for app_item in applications:
+            worker = Worker.query.get(app_item.worker_id)
+            if not worker:
+                continue
+
             if (worker.verification_status or "").strip().lower() != "verified":
                 continue
 
@@ -666,12 +836,14 @@ def job_matches():
 
             if score > 0:
                 matches.append({
+                    "application_id": app_item.id,
                     "worker_id": worker.id,
                     "worker_name": worker.name,
                     "skills": worker.skills,
                     "rating": worker.rating,
                     "experience": worker.experience,
-                    "score": score
+                    "score": score,
+                    "application_status": app_item.status
                 })
 
         matches.sort(key=lambda x: x["score"], reverse=True)
@@ -683,7 +855,8 @@ def job_matches():
             "job_location": job.location,
             "budget": job.budget,
             "status": job.status,
-            "top_matches": matches[:3]
+            "applicant_count": len(applications),
+            "top_matches": matches[:5]
         })
 
     return jsonify(result), 200
@@ -724,8 +897,22 @@ def hire():
         if (worker.verification_status or "").strip().lower() != "verified":
             return jsonify({"error": "Only verified workers can be hired"}), 400
 
+        application = JobApplication.query.filter_by(job_id=job.id, worker_id=worker.id).first()
+        if not application:
+            return jsonify({"error": "This worker has not applied for the job"}), 400
+
         job.status = "assigned"
         job.assigned_worker_id = worker_id
+
+        application.status = "selected"
+
+        other_applications = JobApplication.query.filter(
+            JobApplication.job_id == job.id,
+            JobApplication.worker_id != worker.id
+        ).all()
+
+        for other in other_applications:
+            other.status = "rejected"
 
         transaction = HireTransaction(
             employer_id=session["user_id"],
@@ -831,7 +1018,8 @@ def complete_payment(transaction_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": f"Failed to complete payment: {str(e)}"}), 500
-    
+
+
 @app.route("/add_review", methods=["POST"])
 def add_review():
     if not is_logged_in():

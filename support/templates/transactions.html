@@ -54,6 +54,7 @@
       <div>
         <h2 class="text-xl font-bold">All Transactions</h2>
         {% if role == "admin" %}
+          <p class="text-sm text-white/70 mt-1">All hiring records across the platform</p>
         {% else %}
           <p class="text-sm text-white/70 mt-1">Hiring & payments</p>
         {% endif %}
@@ -75,11 +76,12 @@
             <th class="px-6 py-4 text-left">Employer</th>
             <th class="px-6 py-4 text-left">Worker</th>
             <th class="px-6 py-4 text-left">Job</th>
+            <th class="px-6 py-4 text-left">Location</th>
             <th class="px-6 py-4 text-center">Amount</th>
             <th class="px-6 py-4 text-center">Status</th>
-              {% if role != 'admin' %}
+            {% if role != 'admin' %}
             <th class="px-6 py-4 text-center">Action</th>
-             {% endif %}
+            {% endif %}
           </tr>
         </thead>
 
@@ -150,7 +152,6 @@
 <script>
 const ROLE = "{{ role }}";
 let selectedWorkerId = null;
-let selectedJobId = null;
 let selectedTransactionId = null;
 
 const messageModal = document.getElementById("messageModal");
@@ -183,30 +184,34 @@ function closeMessageModal() {
   messageModal.classList.add("hidden");
 }
 
-modalOkBtn.addEventListener("click", closeMessageModal);
+if (modalOkBtn) {
+  modalOkBtn.addEventListener("click", closeMessageModal);
+}
 
-messageModal.addEventListener("click", function (e) {
-  if (e.target === messageModal) {
-    closeMessageModal();
-  }
-});
+if (messageModal) {
+  messageModal.addEventListener("click", function (e) {
+    if (e.target === messageModal) {
+      closeMessageModal();
+    }
+  });
+}
 
 function getStatusBadge(status) {
   const s = (status || "").toLowerCase();
 
   if (s === "assigned") {
-    return `<span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs">Assigned</span>`;
+    return `<span class="px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-xs border border-pink-400/20">Assigned</span>`;
   }
 
   if (s === "completed") {
-    return `<span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 text-xs">Completed</span>`;
+    return `<span class="px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 text-xs border border-purple-400/20">Completed</span>`;
   }
 
   if (s === "cancelled") {
-    return `<span class="px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs">Cancelled</span>`;
+    return `<span class="px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 text-xs border border-rose-400/20">Cancelled</span>`;
   }
 
-  return `<span class="px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-xs">${status || "Unknown"}</span>`;
+  return `<span class="px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-xs border border-gray-400/20">${status || "Unknown"}</span>`;
 }
 
 function getActionButtons(t) {
@@ -222,7 +227,7 @@ function getActionButtons(t) {
 
   if (s === "completed") {
     return `
-      <button onclick="openReviewModal(${t.worker_id}, ${t.job_id}, ${t.id})"
+      <button onclick="openReviewModal(${t.worker_id}, ${t.id})"
       class="bg-gradient-to-r from-pink-500 to-purple-600 px-3 py-2 rounded-lg text-xs font-semibold hover:opacity-90 transition">
       Review
       </button>`;
@@ -266,15 +271,16 @@ async function loadTransactions() {
           <td class="px-6 py-4">${t.employer_name}</td>
           <td class="px-6 py-4">${t.worker_name}</td>
           <td class="px-6 py-4">${t.job_title}</td>
+          <td class="px-6 py-4">${t.location || "-"}</td>
           <td class="px-6 py-4 text-center font-semibold text-white">
             BDT ${Number(t.amount || 0).toLocaleString()}
           </td>
           <td class="px-6 py-4 text-center">${getStatusBadge(t.status)}</td>
-            ${ROLE !== "admin" ? `
+          ${ROLE !== "admin" ? `
           <td class="px-6 py-4 text-center">
             ${getActionButtons(t)}
           </td>
-            ` : ""}
+          ` : ""}
         </tr>
       `;
     });
@@ -288,14 +294,13 @@ async function loadTransactions() {
   }
 }
 
-function openReviewModal(workerId, jobId, transactionId) {
+function openReviewModal(workerId, transactionId) {
   if (ROLE === "admin") {
     showMessageModal("error", "Admin cannot submit reviews.");
     return;
   }
 
   selectedWorkerId = workerId;
-  selectedJobId = jobId;
   selectedTransactionId = transactionId;
 
   document.getElementById("reviewModal").classList.remove("hidden");
@@ -353,26 +358,16 @@ async function payNow(id) {
   }
 
   try {
-    let res = await fetch(`/complete-payment/${id}`, {
+    const res = await fetch(`/complete-payment/${id}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" }
     });
 
-    let data = await res.json().catch(() => null);
+    const data = await res.json();
 
     if (!res.ok) {
-      const fallbackRes = await fetch("/pay_transaction", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transaction_id: id })
-      });
-
-      data = await fallbackRes.json().catch(() => null);
-
-      if (!fallbackRes.ok) {
-        showMessageModal("error", (data && data.error) || "Payment failed.");
-        return;
-      }
+      showMessageModal("error", (data && data.error) || "Payment failed.");
+      return;
     }
 
     showMessageModal("success", (data && data.message) || "Payment done.");

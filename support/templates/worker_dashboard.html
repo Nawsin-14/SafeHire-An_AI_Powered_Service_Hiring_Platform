@@ -50,26 +50,10 @@
         <a class="hover:text-white" href="/">Home</a>
 
         {% if username %}
-          {% if role == "admin" %}
-            <a class="hover:text-white" href="/verify-workers">Verify</a>
-            <a class="hover:text-white" href="/transactions">Transactions</a>
-          
-          {% elif role == "employer" %}
-            <a class="hover:text-white" href="/jobs">Jobs</a>
-            <a class="hover:text-white" href="/post-job">Post Job</a>
-            <a class="hover:text-white" href="/transactions">Transactions</a>
-          {% endif %}
-
           <div class="flex items-center gap-3 ml-auto">
             <span class="text-gray-300 text-sm">Hi, {{ username }}</span>
             <a href="/logout" class="px-4 py-2 rounded-xl bg-purple-500 text-white text-sm font-medium hover:opacity-90">
               Logout
-            </a>
-          </div>
-        {% else %}
-          <div class="flex items-center gap-3 ml-auto">
-            <a href="/login" class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90">
-              Login
             </a>
           </div>
         {% endif %}
@@ -78,17 +62,16 @@
   </header>
 
   <main class="max-w-6xl mx-auto px-4 py-8">
-
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
       <div>
         <p class="text-pink-300 text-sm font-medium">Worker Panel</p>
         <h1 class="text-3xl font-bold">My Dashboard</h1>
-        <p class="text-gray-300 mt-1">Manage your profile, monitor assigned jobs, and track expected earnings</p>
+        <p class="text-gray-300 mt-1">Manage your profile, view matching jobs, apply, and track work</p>
       </div>
 
       <div class="flex gap-3">
         <a href="/update-worker" class="bg-pink-500 hover:bg-pink-600 text-white font-semibold px-6 py-3 rounded-2xl transition">
-         Update Profile
+          Update Profile
         </a>
       </div>
     </div>
@@ -240,7 +223,33 @@
       </div>
     </section>
 
-    <div class="mt-6 bg-white/10 backdrop-blur border border-white/10 rounded-2xl p-5">
+    <section class="mt-8 bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xl font-bold">Available Jobs For You</h2>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-400/20">
+          Matching Jobs
+        </span>
+      </div>
+
+      <div id="availableJobs" class="grid md:grid-cols-2 gap-4">
+        <p class="text-gray-400">Loading jobs...</p>
+      </div>
+    </section>
+
+    <section class="mt-8 bg-white/10 border border-white/10 rounded-3xl p-6 backdrop-blur shadow-2xl">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="text-xl font-bold">My Applications</h2>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-300 border border-purple-400/20">
+          Application Status
+        </span>
+      </div>
+
+      <div id="myApplications" class="grid md:grid-cols-2 gap-4">
+        <p class="text-gray-400">Loading applications...</p>
+      </div>
+    </section>
+
+    <div class="mt-8 bg-white/10 backdrop-blur border border-white/10 rounded-2xl p-5">
       <div class="flex items-center justify-between mb-4">
         <h3 class="text-lg font-bold">Your Reviews</h3>
         <span class="text-sm text-yellow-300 font-semibold">⭐ {{ worker.rating }}</span>
@@ -274,8 +283,33 @@
     </section>
 
     {% endif %}
-
   </main>
 
+  <div id="messageModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
+    <div class="w-full max-w-md bg-gradient-to-br from-[#24124D] to-[#6B21A8] border border-white/10 rounded-3xl shadow-2xl p-6 text-white">
+      <div class="flex items-start gap-4">
+        <div id="modalIcon"
+             class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+          ✓
+        </div>
+
+        <div class="flex-1">
+          <h2 id="modalTitle" class="text-2xl font-bold mb-2">Success</h2>
+          <p id="modalMessage" class="text-white/80 leading-relaxed">
+            Action completed successfully.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end">
+        <button id="modalOkBtn"
+                class="bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-2xl font-semibold transition">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/worker_dashboard.js"></script>
 </body>
 </html>

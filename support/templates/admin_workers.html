@@ -26,107 +26,116 @@
 
 <body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
 
-  <header class="sticky top-0 z-50 bg-white/10 backdrop-blur border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <img
-          src="/static/images/SafeHire_logo.png"
-          alt="SafeHire Logo"
-          class="h-12 w-12 rounded-full object-cover border border-white/20 shadow-lg"
-        />
-        <div>
-          <h1 class="text-2xl font-extrabold leading-tight">SafeHire</h1>
-          <p class="text-white/70 text-sm leading-tight">AI Powered Hiring Platform</p>
-        </div>
-      </div>
+<header class="sticky top-0 z-50 bg-white/10 backdrop-blur border-b border-white/10">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <img src="/static/images/SafeHire_logo.png"
+           class="h-12 w-12 rounded-full border border-white/20 shadow-lg"/>
 
-      <div class="flex items-center gap-3">
-        <span class="text-sm text-white/70">
-          Logged in as <span class="font-semibold text-white">{{ username }}</span>
-        </span>
-        <a href="/admin-dashboard"
-           class="inline-flex items-center rounded-xl bg-white/10 px-4 py-2 text-sm font-medium text-white hover:bg-white/20 transition">
-          Dashboard
-        </a>
-        <a href="/logout"
-           class="inline-flex items-center rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 transition">
-          Logout
-        </a>
+      <div>
+        <h1 class="text-2xl font-extrabold">SafeHire</h1>
+        <p class="text-white/70 text-sm">AI Powered Hiring Platform</p>
       </div>
     </div>
-  </header>
 
-  <main class="max-w-7xl mx-auto px-6 py-8">
-    <section class="bg-white/10 backdrop-blur border border-white/10 rounded-3xl shadow-lg overflow-hidden">
-      <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between">
-        <div>
-          <h2 class="text-2xl font-bold">Workers List</h2>
-          <p class="text-white/70 text-sm mt-1">Verify, reject, or keep workers pending</p>
-        </div>
+    <div class="flex items-center gap-3">
+      <span class="text-sm text-white/70">
+        Logged in as <span class="font-semibold text-white">{{ username }}</span>
+      </span>
 
-        <button id="refreshBtn"
-                class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition">
-          Refresh
-        </button>
-      </div>
+      <a href="/admin-dashboard"
+         class="bg-white/10 px-4 py-2 rounded-xl text-sm hover:bg-white/20 transition">
+        Dashboard
+      </a>
 
-      <div id="loading" class="px-6 py-6 text-white/70">
-        Loading workers...
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="min-w-full hidden text-white" id="workersTable">
-          <thead class="bg-white/10 backdrop-blur">
-            <tr class="text-left text-sm text-white/70">
-              <th class="px-6 py-4 font-semibold">ID</th>
-              <th class="px-6 py-4 font-semibold">Name</th>
-              <th class="px-6 py-4 font-semibold">NID</th>
-              <th class="px-6 py-4 font-semibold">Phone</th>
-              <th class="px-6 py-4 font-semibold">Address</th>
-              <th class="px-6 py-4 font-semibold">Skills</th>
-              <th class="px-6 py-4 font-semibold text-center">Experience</th>
-              <th class="px-6 py-4 font-semibold text-center">Rating</th>
-              <th class="px-6 py-4 font-semibold text-center">Risk Score</th>
-              <th class="px-6 py-4 font-semibold text-center">Status</th>
-              <th class="px-6 py-4 font-semibold text-center">Actions</th>
-            </tr>
-          </thead>
-
-          <tbody id="workersBody" class="divide-y divide-white/10"></tbody>
-        </table>
-      </div>
-
-      <div id="emptyState" class="hidden px-6 py-10 text-center text-white/70">
-        No workers found
-      </div>
-    </section>
-  </main>
-
-  <div id="messageModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
-    <div class="w-full max-w-md bg-gradient-to-br from-[#24124D] to-[#6B21A8] border border-white/10 rounded-3xl shadow-2xl p-6 text-white">
-      <div class="flex items-start gap-4">
-        <div id="modalIcon"
-             class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-          ✓
-        </div>
-
-        <div class="flex-1">
-          <h2 id="modalTitle" class="text-2xl font-bold mb-2">Success</h2>
-          <p id="modalMessage" class="text-white/80 leading-relaxed">
-            Worker verification updated successfully
-          </p>
-        </div>
-      </div>
-
-      <div class="mt-6 flex justify-end">
-        <button id="modalOkBtn"
-                class="bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-2xl font-semibold transition">
-          OK
-        </button>
-      </div>
+      <a href="/logout"
+         class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition">
+        Logout
+      </a>
     </div>
   </div>
+</header>
 
-  <script src="/static/js/verify_workers.js"></script>
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+<section class="bg-white/10 backdrop-blur border border-white/10 rounded-3xl shadow-xl overflow-hidden">
+
+  <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold">Workers List</h2>
+      <p class="text-white/70 text-sm mt-1">Verify, reject, or manage worker profiles</p>
+    </div>
+
+    <button id="refreshBtn"
+            class="bg-emerald-600 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition">
+      Refresh
+    </button>
+  </div>
+
+  <div id="loading" class="px-6 py-6 text-white/70">
+    Loading workers...
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full hidden text-white" id="workersTable">
+      <thead class="bg-white/10 text-white/70 text-sm">
+        <tr>
+          <th class="px-6 py-4">ID</th>
+          <th class="px-6 py-4">Name</th>
+          <th class="px-6 py-4">NID</th>
+          <th class="px-6 py-4">Phone</th>
+          <th class="px-6 py-4">Address</th>
+          <th class="px-6 py-4">Skills</th>
+          <th class="px-6 py-4 text-center">Exp</th>
+          <th class="px-6 py-4 text-center">Rating</th>
+          <th class="px-6 py-4 text-center">Risk</th>
+          <th class="px-6 py-4 text-center">Status</th>
+          <th class="px-6 py-4 text-center">Actions</th>
+        </tr>
+      </thead>
+
+      <tbody id="workersBody" class="divide-y divide-white/10"></tbody>
+    </table>
+  </div>
+
+  <div id="emptyState" class="hidden px-6 py-10 text-center text-white/70">
+    No workers found
+  </div>
+
+</section>
+
+</main>
+
+<div id="messageModal"
+     class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
+
+  <div class="w-full max-w-md bg-gradient-to-br from-[#24124D] to-[#6B21A8] border border-white/10 rounded-3xl shadow-2xl p-6 text-white">
+
+    <div class="flex items-start gap-4">
+      <div id="modalIcon"
+           class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+        ✓
+      </div>
+
+      <div class="flex-1">
+        <h2 id="modalTitle" class="text-2xl font-bold mb-2">Success</h2>
+        <p id="modalMessage" class="text-white/80">
+          Worker verification updated successfully
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <button id="modalOkBtn"
+              class="bg-pink-500 hover:bg-pink-600 px-6 py-3 rounded-2xl font-semibold transition">
+        OK
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script src="/static/js/verify_workers.js"></script>
+
 </body>
 </html>
