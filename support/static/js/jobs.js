@@ -163,7 +163,7 @@ function getAdminViewCard(job) {
       <p class="mt-3 text-lg font-semibold">BDT ${job.budget}</p>
 
       <p class="mt-4 text-sm text-white/80">
-        ${job.description ? job.description : "No description provided."}
+        ${job.description ? job.description : "No description provided"}
       </p>
 
       <div class="mt-4 pt-4 border-t border-white/10 flex items-center justify-between">
@@ -192,7 +192,7 @@ async function loadJobs() {
       if (!Array.isArray(jobs) || jobs.length === 0) {
         jobsContainer.innerHTML = `
           <div class="col-span-full bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 text-white/70">
-            No jobs found.
+            No jobs found
           </div>
         `;
         return;
@@ -212,7 +212,7 @@ async function loadJobs() {
     if (!Array.isArray(jobs) || jobs.length === 0) {
       jobsContainer.innerHTML = `
         <div class="col-span-full bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 text-white/70">
-          No jobs found.
+          No jobs found
         </div>
       `;
       return;
@@ -226,7 +226,7 @@ async function loadJobs() {
     console.error(error);
     jobsContainer.innerHTML = `
       <div class="col-span-full bg-white/10 backdrop-blur p-6 rounded-2xl border border-white/10 text-red-300">
-        Failed to load jobs.
+        Failed to load jobs
       </div>
     `;
   }
