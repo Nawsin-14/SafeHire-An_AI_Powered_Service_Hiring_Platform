@@ -1,6 +1,6 @@
-from flask import jsonify, render_template, redirect, request, session
+from flask import jsonify, render_template, redirect, request, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from flask_login import login_user 
 from support.app import app
 from support.models import db, Worker, Job, HireTransaction, User, Review, JobApplication
 from support.services.matching import calculate_match_score
@@ -120,44 +120,89 @@ def signup():
         return jsonify({"error": f"Signup failed: {str(e)}"}), 500
 
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "GET":
-        return render_template("login.html")
+@app.route("/login", methods=["GET", "POST"]) 
 
-    try:
-        data = request.get_json(silent=True) or request.form.to_dict() or {}
+def login(): 
 
-        username = data.get("username", "").strip()
-        password = data.get("password", "").strip()
+    if request.method == "GET": 
 
-        if not username or not password:
-            return jsonify({"error": "Username and password are required"}), 400
+        return render_template("login.html") 
 
-        user = User.query.filter_by(username=username).first()
+  
 
-        if not user or not verify_user_password(user, password):
-            return jsonify({"error": "Invalid credentials"}), 401
+    try: 
 
-        session["user_id"] = user.id
-        session["username"] = user.username
-        session["role"] = user.role
+       
 
-        if user.role == "admin":
-            redirect_url = "/admin-dashboard"
-        elif user.role == "worker":
-            redirect_url = "/worker-dashboard"
-        else:
-            redirect_url = "/jobs"
+        data = request.get_json(silent=True) or request.form.to_dict() or {} 
 
-        return jsonify({
-            "message": "Login successful",
-            "role": user.role,
-            "redirect": redirect_url
-        }), 200
+  
 
-    except Exception as e:
-        return jsonify({"error": f"Login failed: {str(e)}"}), 500
+        username = data.get("username", "").strip() 
+
+        password = data.get("password", "").strip() 
+
+  
+
+     
+
+        if not username or not password: 
+
+            return jsonify({"error": "Username and password are required"}), 400 
+
+  
+
+      
+
+        user = User.query.filter_by(username=username).first() 
+
+  
+
+    
+
+        if not user or not user.check_password(password):  # Assuming `check_password` is a method in the User model 
+
+            return jsonify({"error": "Invalid credentials"}), 401 
+
+  
+
+     
+
+        login_user(user) 
+
+  
+
+   
+
+        if user.role == "admin": 
+
+            redirect_url = "/admin-dashboard" 
+
+        elif user.role == "worker": 
+
+            redirect_url = "/worker-dashboard" 
+
+        else: 
+
+            redirect_url = "/jobs" 
+
+  
+
+        return jsonify({ 
+
+            "message": "Login successful", 
+
+            "role": user.role, 
+
+            "redirect": redirect_url 
+
+        }), 200 
+
+  
+
+    except Exception as e: 
+
+        return jsonify({"error": f"Login failed: {str(e)}"}), 500 
 
 
 @app.route("/admin-login", methods=["GET", "POST"])
@@ -198,10 +243,21 @@ def admin_login():
         return jsonify({"error": f"Admin login failed: {str(e)}"}), 500
 
 
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/")
+from flask import redirect, url_for 
+
+from flask_login import logout_user, login_required 
+
+  
+
+@app.route("/logout") 
+
+@login_required 
+
+def logout(): 
+
+    logout_user() 
+
+    return redirect(url_for("home"))   
 
 
 @app.route("/dashboard")
