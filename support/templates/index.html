@@ -1,76 +1,83 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SafeHire</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ["Inter", "ui-sans-serif", "system-ui"]
-          },
-          colors: {
-            brand: {
-              50: "#F5D0FE",
-              100: "#F0ABFC",
-              500: "#EC4899",
-              600: "#DB2777",
-              700: "#BE185D"
-            }
-          },
-          boxShadow: {
-            glow: "0 0 40px rgba(236,72,153,0.25)"
-          }
-        }
-      }
-    }
-  </script>
-</head>
-
-<body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
-
-  <header class="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b border-white/10">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3">
-      <div class="flex items-center gap-3">
-        <img
-          src="/static/images/SafeHire_logo.png"
-          alt="SafeHire Logo"
-          class="h-12 w-12 rounded-full shadow-lg"
-        />
-        <div>
-          <p class="font-bold text-xl leading-5 text-white">SafeHire</p>
-          <p class="text-xs text-gray-300 mt-1">AI Powered Service Hiring Platform</p>
-        </div>
-      </div>
-
-      <nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full">
-
-        <div class="flex items-center gap-3 ml-auto">
-          <a href="/signup"
-             class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90">
-            Sign Up
-          </a>
-
-          <a href="/login"
-             class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 transition">
-            Login
-          </a>
-
-          <a href="/admin-login" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white font-semibold px-6 py-3 rounded-2xl transition">
-            Admin Login
-          </a>
-        </div>
-      </nav>
-    </div>
-  </header>
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+<meta charset="UTF-8" /> 
+<meta name="viewport" content="width=device-width, initial-scale=1" /> 
+<title>SafeHire</title> 
+ 
+<link rel="preconnect" href="https://fonts.googleapis.com"> 
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> 
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"> 
+ 
+<script src="https://cdn.tailwindcss.com"></script> 
+<script> 
+tailwind.config = { 
+theme: { 
+extend: { 
+fontFamily: { 
+sans: ["Inter", "ui-sans-serif", "system-ui"] 
+}, 
+colors: { 
+brand: { 
+50: "#F5D0FE", 
+100: "#F0ABFC", 
+500: "#EC4899", 
+600: "#DB2777", 
+700: "#BE185D" 
+} 
+}, 
+boxShadow: { 
+glow: "0 0 40px rgba(236,72,153,0.25)" 
+} 
+} 
+} 
+} 
+</script> 
+</head> 
+ 
+<body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]"> 
+ 
+<header class="sticky top-0 z-50 bg-black/20 backdrop-blur-xl border-b border-white/10"> 
+<div class="max-w-7xl mx-auto px-6 py-4 flex items-center gap-3"> 
+<div class="flex items-center gap-3"> 
+<img 
+src="/static/images/SafeHire_logo.png" 
+alt="SafeHire Logo" 
+class="h-12 w-12 rounded-full shadow-lg" 
+/> 
+<div> 
+<p class="font-bold text-xl leading-5 text-white">SafeHire</p> 
+<p class="text-xs text-gray-300 mt-1">AI Powered Service Hiring Platform</p> 
+</div> 
+</div> 
+ 
+<nav class="hidden md:flex items-center gap-6 text-sm text-gray-300 w-full"> 
+ 
+<div class="flex items-center gap-3 ml-auto"> 
+{% if current_user.is_authenticated %} 
+<p class="text-white">Logged in as: {{ current_user.username }}</p> 
+<a href="/logout" class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 transition"> 
+Logout 
+</a> 
+{% else %} 
+<a href="/signup" 
+class="px-4 py-2 rounded-xl bg-pink-500 text-white text-sm font-medium hover:opacity-90"> 
+Sign Up 
+</a> 
+ 
+<a href="/login" 
+class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 transition"> 
+Login 
+</a> 
+ 
+<a href="/admin-login" class="bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-90 text-white font-semibold px-6 py-3 rounded-2xl transition"> 
+Admin Login 
+</a> 
+{% endif %} 
+</div> 
+</nav> 
+</div> 
+</header>
 
   <main class="max-w-7xl mx-auto px-6 pt-8 pb-20">
 
