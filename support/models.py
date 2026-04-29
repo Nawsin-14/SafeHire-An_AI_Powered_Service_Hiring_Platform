@@ -1,10 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
+from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
 
 db = SQLAlchemy()
 
-
-class User(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
@@ -24,6 +25,12 @@ class User(db.Model):
             "address": self.address,
             "gender": self.gender
         }
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 
 class Worker(db.Model):
@@ -111,7 +118,6 @@ class HireTransaction(db.Model):
             "amount": self.amount,
             "created_at": str(self.created_at)
         }
-
 
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)

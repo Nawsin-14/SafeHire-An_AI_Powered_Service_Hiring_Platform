@@ -1,18 +1,16 @@
 from flask import jsonify, render_template, redirect, request, session, url_for
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user 
+from flask_login import login_required, login_user, logout_user
 from support.app import app
-from support.models import db, Worker, Job, HireTransaction, User, Review, JobApplication
+from support.models import db, HireTransaction, Job, JobApplication, Review, User, Worker
 from support.services.matching import calculate_match_score
 
 
 def is_logged_in():
     return "user_id" in session
 
-
 def has_role(*roles):
     return session.get("role") in roles
-
 
 def verify_user_password(user, password):
     if not user or not password:
@@ -36,18 +34,12 @@ def verify_user_password(user, password):
 
 @app.route("/")
 def home():
-    role = session.get("role")
-    username = session.get("username")
-
-    total_workers = Worker.query.count()
-    total_jobs = Job.query.count()
-
     return render_template(
         "index.html",
-        role=role,
-        username=username,
-        total_workers=total_workers,
-        total_jobs=total_jobs
+        role=session.get("role"),
+        username=session.get("username"),
+        total_workers=Worker.query.count(),
+        total_jobs=Job.query.count()
     )
 
 
@@ -85,15 +77,11 @@ def signup():
         if User.query.filter_by(username=username).first():
             return jsonify({"error": "Username already exists"}), 400
 
-        if hasattr(User, "phone"):
-            existing_phone = User.query.filter_by(phone=phone).first()
-            if existing_phone:
-                return jsonify({"error": "Phone number already exists"}), 400
+        if User.query.filter_by(phone=phone).first():
+            return jsonify({"error": "Phone number already exists"}), 400
 
-        if hasattr(User, "nid"):
-            existing_nid = User.query.filter_by(nid=nid).first()
-            if existing_nid:
-                return jsonify({"error": "NID already exists"}), 400
+        if User.query.filter_by(nid=nid).first():
+            return jsonify({"error": "NID already exists"}), 400
 
         hashed_password = generate_password_hash(password)
 
@@ -120,89 +108,45 @@ def signup():
         return jsonify({"error": f"Signup failed: {str(e)}"}), 500
 
 
-@app.route("/login", methods=["GET", "POST"]) 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "GET":
+        return render_template("login.html")
 
-def login(): 
+    try:
+        data = request.get_json(silent=True) or request.form.to_dict() or {}
 
-    if request.method == "GET": 
+        username = data.get("username", "").strip()
+        password = data.get("password", "").strip()
 
-        return render_template("login.html") 
+        if not username or not password:
+            return jsonify({"error": "Username and password are required"}), 400
 
-  
+        user = User.query.filter_by(username=username).first()
 
-    try: 
+        if not user or not verify_user_password(user, password):
+            return jsonify({"error": "Invalid credentials"}), 401
 
-       
+        login_user(user)
+        session["user_id"] = user.id
+        session["username"] = user.username
+        session["role"] = user.role
 
-        data = request.get_json(silent=True) or request.form.to_dict() or {} 
+        if user.role == "admin":
+            redirect_url = "/admin-dashboard"
+        elif user.role == "worker":
+            redirect_url = "/worker-dashboard"
+        else:
+            redirect_url = "/jobs"
 
-  
+        return jsonify({
+            "message": "Login successful",
+            "role": user.role,
+            "redirect": redirect_url
+        }), 200
 
-        username = data.get("username", "").strip() 
-
-        password = data.get("password", "").strip() 
-
-  
-
-     
-
-        if not username or not password: 
-
-            return jsonify({"error": "Username and password are required"}), 400 
-
-  
-
-      
-
-        user = User.query.filter_by(username=username).first() 
-
-  
-
-    
-
-        if not user or not user.check_password(password):  # Assuming `check_password` is a method in the User model 
-
-            return jsonify({"error": "Invalid credentials"}), 401 
-
-  
-
-     
-
-        login_user(user) 
-
-  
-
-   
-
-        if user.role == "admin": 
-
-            redirect_url = "/admin-dashboard" 
-
-        elif user.role == "worker": 
-
-            redirect_url = "/worker-dashboard" 
-
-        else: 
-
-            redirect_url = "/jobs" 
-
-  
-
-        return jsonify({ 
-
-            "message": "Login successful", 
-
-            "role": user.role, 
-
-            "redirect": redirect_url 
-
-        }), 200 
-
-  
-
-    except Exception as e: 
-
-        return jsonify({"error": f"Login failed: {str(e)}"}), 500 
+    except Exception as e:
+        return jsonify({"error": f"Login failed: {str(e)}"}), 500
 
 
 @app.route("/admin-login", methods=["GET", "POST"])
@@ -224,12 +168,14 @@ def admin_login():
 
         user = User.query.filter_by(username=username, role="admin").first()
 
+
         if not user:
             return jsonify({"error": "Admin account not found"}), 404
 
         if not verify_user_password(user, password):
             return jsonify({"error": "Invalid admin password"}), 401
 
+        login_user(user)
         session["user_id"] = user.id
         session["username"] = user.username
         session["role"] = user.role
@@ -243,20 +189,13 @@ def admin_login():
         return jsonify({"error": f"Admin login failed: {str(e)}"}), 500
 
 
-from flask import redirect, url_for 
-
-from flask_login import logout_user, login_required 
-
-  
-
 @app.route("/logout") 
-
-@login_required 
-
+@login_required
 def logout(): 
-
-    logout_user() 
-
+    logout_user()
+    session.pop("user_id", None)
+    session.pop("username", None)
+    session.pop("role", None)
     return redirect(url_for("home"))   
 
 
