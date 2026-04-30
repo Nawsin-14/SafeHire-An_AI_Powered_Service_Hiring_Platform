@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeHire Admin - Employers</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "ui-sans-serif", "system-ui"]
+          }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="min-h-screen font-sans text-white bg-gradient-to-br from-[#0B1020] via-[#24124D] to-[#6B21A8]">
+
+<header class="sticky top-0 z-50 bg-white/10 backdrop-blur border-b border-white/10">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <img src="/static/images/SafeHire_logo.png"
+           alt="SafeHire Logo"
+           class="h-12 w-12 rounded-full border border-white/20 shadow-lg object-cover"/>
+
+      <div>
+        <h1 class="text-2xl font-extrabold">SafeHire</h1>
+        <p class="text-white/70 text-sm">AI Powered Hiring Platform</p>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <span class="hidden sm:inline text-sm text-white/70">
+        Logged in as <span class="font-semibold text-white">{{ username }}</span>
+      </span>
+
+      <a href="/admin-dashboard"
+         class="bg-white/10 px-4 py-2 rounded-xl text-sm hover:bg-white/20 transition">
+        Dashboard
+      </a>
+
+      <a href="/logout"
+         class="bg-gradient-to-r from-pink-500 to-purple-600 px-4 py-2 rounded-xl text-sm font-semibold hover:opacity-90 transition">
+        Logout
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+<section class="bg-white/10 backdrop-blur border border-white/10 rounded-3xl shadow-xl overflow-hidden">
+
+  <div class="px-6 py-5 border-b border-white/10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold">Employers List</h2>
+      <p class="text-white/70 text-sm mt-1">Registered employer accounts and their posting activity</p>
+    </div>
+
+    <a href="/jobs"
+       class="bg-emerald-600 px-4 py-2 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition text-center">
+      View Jobs
+    </a>
+  </div>
+
+  {% if employers %}
+  <div class="overflow-x-auto">
+    <table class="min-w-full text-white">
+      <thead class="bg-white/10 text-white/70 text-sm">
+        <tr>
+          <th class="px-6 py-4 text-left">ID</th>
+          <th class="px-6 py-4 text-left">Username</th>
+          <th class="px-6 py-4 text-left">NID</th>
+          <th class="px-6 py-4 text-left">Phone</th>
+          <th class="px-6 py-4 text-left">Gender</th>
+          <th class="px-6 py-4 text-left">Address</th>
+          <th class="px-6 py-4 text-center">Jobs Posted</th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-white/10">
+        {% for employer in employers %}
+        <tr class="hover:bg-white/5 transition">
+          <td class="px-6 py-4">{{ employer.id }}</td>
+          <td class="px-6 py-4 font-semibold">{{ employer.username }}</td>
+          <td class="px-6 py-4 text-white/80">{{ employer.nid }}</td>
+          <td class="px-6 py-4 text-white/80">{{ employer.phone }}</td>
+          <td class="px-6 py-4 text-white/80 capitalize">{{ employer.gender }}</td>
+          <td class="px-6 py-4 text-white/80">{{ employer.address }}</td>
+          <td class="px-6 py-4 text-center font-semibold text-pink-300">
+            {{ job_counts.get(employer.id, 0) }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="px-6 py-10 text-center text-white/70">
+    No employers found
+  </div>
+  {% endif %}
+
+</section>
+
+</main>
+
+</body>
+</html>

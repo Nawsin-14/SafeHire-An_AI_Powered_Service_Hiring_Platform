@@ -650,6 +650,29 @@ def admin_workers_page():
     )
 
 
+@app.route("/admin-employers")
+def admin_employers_page():
+    if not is_logged_in():
+        return redirect("/login")
+
+    if not has_role("admin"):
+        return redirect("/")
+
+    employers = User.query.filter_by(role="employer").order_by(User.id.desc()).all()
+    job_counts = {
+        employer.id: Job.query.filter_by(employer_id=employer.id).count()
+        for employer in employers
+    }
+
+    return render_template(
+        "admin_employers.html",
+        username=session.get("username"),
+        role=session.get("role"),
+        employers=employers,
+        job_counts=job_counts
+    )
+
+
 @app.route("/jobs")
 def jobs_page():
     if not is_logged_in():
