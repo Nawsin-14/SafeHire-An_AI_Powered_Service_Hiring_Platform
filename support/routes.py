@@ -631,7 +631,8 @@ def admin_dashboard():
         total_workers=Worker.query.count(),
         total_employers=User.query.filter_by(role="employer").count(),
         total_jobs=Job.query.count(),
-        total_transactions=HireTransaction.query.count()
+        total_transactions=HireTransaction.query.count(),
+        total_reviews=Review.query.count()
     )
 
 
@@ -670,6 +671,42 @@ def admin_employers_page():
         role=session.get("role"),
         employers=employers,
         job_counts=job_counts
+    )
+
+
+@app.route("/admin-reviews")
+def admin_reviews_page():
+    if not is_logged_in():
+        return redirect("/login")
+
+    if not has_role("admin"):
+        return redirect("/")
+
+    reviews = Review.query.order_by(Review.created_at.desc()).all()
+    review_rows = []
+
+    for review in reviews:
+        employer = User.query.get(review.employer_id)
+        worker = Worker.query.get(review.worker_id)
+        transaction = HireTransaction.query.get(review.transaction_id)
+        job = Job.query.get(transaction.job_id) if transaction else None
+
+        review_rows.append({
+            "id": review.id,
+            "employer_name": employer.username if employer else "Unknown",
+            "worker_name": worker.name if worker else "Unknown",
+            "job_title": job.title if job else "Unknown",
+            "transaction_id": review.transaction_id,
+            "rating": review.rating,
+            "comment": review.comment,
+            "created_at": review.created_at.strftime("%Y-%m-%d") if review.created_at else ""
+        })
+
+    return render_template(
+        "admin_reviews.html",
+        username=session.get("username"),
+        role=session.get("role"),
+        reviews=review_rows
     )
 
 

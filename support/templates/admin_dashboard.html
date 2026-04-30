@@ -62,7 +62,7 @@
             </div>
         </section>
 
-        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-12">
+        <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-6 mb-12">
             <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[160px] flex flex-col justify-between">
                 <div>
                     <p class="text-white/70 text-base mb-3">Total Workers</p>
@@ -88,6 +88,13 @@
                 <div>
                     <p class="text-white/70 text-base mb-3">Total Transactions</p>
                     <h3 class="text-4xl font-extrabold">{{ total_transactions }}</h3>
+                </div>
+            </div>
+
+            <div class="bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl min-h-[160px] flex flex-col justify-between">
+                <div>
+                    <p class="text-white/70 text-base mb-3">Total Reviews</p>
+                    <h3 class="text-4xl font-extrabold">{{ total_reviews }}</h3>
                 </div>
             </div>
         </section>
@@ -137,6 +144,16 @@
                    class="group flex flex-col justify-between bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[180px]">
                     <div>
                         <h4 class="text-2xl font-bold">Transactions</h4>
+                    </div>
+                    <span class="mt-5 text-pink-300 font-semibold group-hover:text-pink-200 transition">
+                        Open →
+                    </span>
+                </a>
+
+                <a href="/admin-reviews"
+                   class="group flex flex-col justify-between bg-white/10 backdrop-blur-lg border border-white/10 rounded-3xl p-6 shadow-xl hover:bg-white/15 hover:-translate-y-1 transition duration-200 min-h-[180px]">
+                    <div>
+                        <h4 class="text-2xl font-bold">View Reviews</h4>
                     </div>
                     <span class="mt-5 text-pink-300 font-semibold group-hover:text-pink-200 transition">
                         Open →
