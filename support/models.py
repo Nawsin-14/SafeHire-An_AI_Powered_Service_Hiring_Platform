@@ -60,6 +60,7 @@ class Worker(db.Model):
             "nid": self.nid,
             "phone": self.phone,
             "address": self.address,
+            "profession": self.profession,
             "skills": self.skills,
             "risk_score": self.risk_score,
             "verification_status": self.verification_status,

@@ -55,7 +55,7 @@ class="h-12 w-12 rounded-full shadow-lg"
  
 <div class="flex items-center gap-3 ml-auto"> 
 {% if current_user.is_authenticated %} 
-<p class="text-white">Logged in as: {{ current_user.username }}</p> 
+<p class="text-white">Logged in as {{ current_user.username }}</p> 
 <a href="/logout" class="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white text-sm font-medium hover:bg-white/20 transition"> 
 Logout 
 </a> 
