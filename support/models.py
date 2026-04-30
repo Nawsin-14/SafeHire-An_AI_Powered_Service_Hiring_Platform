@@ -41,6 +41,7 @@ class Worker(db.Model):
     nid = db.Column(db.String(50), unique=True, nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(200), nullable=False)
+    profession = db.Column(db.String(100), nullable=False)
     skills = db.Column(db.String(200), nullable=False)
 
     risk_score = db.Column(db.Float, default=0)

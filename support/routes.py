@@ -261,6 +261,10 @@ def worker_jobs():
     if not worker:
         return jsonify([]), 200
 
+    # Get the worker's profession
+    worker_profession = worker.profession  # Assuming 'profession' is a field in Worker model
+
+    # Fetch open jobs that match the worker's profession
     open_jobs = Job.query.filter_by(status="open").order_by(Job.id.desc()).all()
 
     applications = JobApplication.query.filter_by(worker_id=worker.id).all()
@@ -269,19 +273,21 @@ def worker_jobs():
     matched_jobs = []
 
     for job in open_jobs:
-        score = calculate_match_score(worker, job)
 
-        if score > 0:
-            matched_jobs.append({
-                "id": job.id,
-                "title": job.title,
-                "category": job.category,
-                "location": job.location,
-                "budget": job.budget,
-                "description": job.description or "",
-                "score": score,
-                "already_applied": job.id in applied_job_ids
-            })
+        if job.category.lower() == worker_profession.lower():
+            score = calculate_match_score(worker, job)
+
+            if score > 0:
+                matched_jobs.append({
+                    "id": job.id,
+                    "title": job.title,
+                    "category": job.category,
+                    "location": job.location,
+                    "budget": job.budget,
+                    "description": job.description or "",
+                    "score": score,
+                    "already_applied": job.id in applied_job_ids
+                })
 
     matched_jobs.sort(key=lambda x: x["score"], reverse=True)
 

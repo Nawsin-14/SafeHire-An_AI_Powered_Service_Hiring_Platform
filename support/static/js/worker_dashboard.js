@@ -113,7 +113,7 @@ async function loadAvailableJobs() {
     });
   } catch (error) {
     console.error(error);
-    availableJobs.innerHTML = `
+    availableJobs.innerHTML = ` 
       <div class="md:col-span-2 text-center py-8">
         <p class="text-rose-300 font-medium">Could not load matching jobs.</p>
       </div>
