@@ -261,8 +261,6 @@ def worker_jobs():
     if not worker:
         return jsonify([]), 200
 
-    worker_profession = worker.profession 
-
     open_jobs = Job.query.filter_by(status="open").order_by(Job.id.desc()).all()
 
     applications = JobApplication.query.filter_by(worker_id=worker.id).all()
@@ -271,21 +269,19 @@ def worker_jobs():
     matched_jobs = []
 
     for job in open_jobs:
+        score = calculate_match_score(worker, job)
 
-        if job.category.lower() == worker_profession.lower():
-            score = calculate_match_score(worker, job)
-
-            if score > 0:
-                matched_jobs.append({
-                    "id": job.id,
-                    "title": job.title,
-                    "category": job.category,
-                    "location": job.location,
-                    "budget": job.budget,
-                    "description": job.description or "",
-                    "score": score,
-                    "already_applied": job.id in applied_job_ids
-                })
+        if score > 0:
+            matched_jobs.append({
+                "id": job.id,
+                "title": job.title,
+                "category": job.category,
+                "location": job.location,
+                "budget": job.budget,
+                "description": job.description or "",
+                "score": score,
+                "already_applied": job.id in applied_job_ids
+            })
 
     matched_jobs.sort(key=lambda x: x["score"], reverse=True)
 
@@ -495,9 +491,10 @@ def update_worker():
         phone = data.get("phone", "").strip()
         address = data.get("address", "").strip()
         skills = data.get("skills", "").strip()
+        profession = data.get("profession", "").strip()
         experience = data.get("experience", 0)
 
-        if not all([name, phone, address, skills]):
+        if not all([name, phone, address, profession, skills]):
             return jsonify({"error": "Missing required fields"}), 400
 
         try:
@@ -508,6 +505,7 @@ def update_worker():
         worker.name = name
         worker.phone = phone
         worker.address = address
+        worker.profession = profession
         worker.skills = skills
         worker.experience = experience
         worker.risk_score = len([s for s in skills.split(",") if s.strip()]) * 10
@@ -884,31 +882,61 @@ def job_matches():
 
     for job in jobs:
         applications = JobApplication.query.filter_by(job_id=job.id).all()
+        application_by_worker_id = {
+            app_item.worker_id: app_item
+            for app_item in applications
+        }
+        verified_workers = Worker.query.filter_by(verification_status="Verified").all()
         matches = []
 
-        for app_item in applications:
-            worker = Worker.query.get(app_item.worker_id)
-            if not worker:
-                continue
-
-            if (worker.verification_status or "").strip().lower() != "verified":
-                continue
-
+        for worker in verified_workers:
             score = calculate_match_score(worker, job)
 
             if score > 0:
+                application = application_by_worker_id.get(worker.id)
+                is_assigned_worker = job.assigned_worker_id == worker.id
+
                 matches.append({
-                    "application_id": app_item.id,
+                    "application_id": application.id if application else None,
                     "worker_id": worker.id,
                     "worker_name": worker.name,
+                    "profession": worker.profession,
                     "skills": worker.skills,
                     "rating": worker.rating,
                     "experience": worker.experience,
                     "score": score,
-                    "application_status": app_item.status
+                    "application_status": application.status if application else "suggested",
+                    "is_assigned": is_assigned_worker
                 })
 
         matches.sort(key=lambda x: x["score"], reverse=True)
+        assigned_matches = [
+            match for match in matches
+            if match["worker_id"] == job.assigned_worker_id
+        ]
+
+        if (job.status or "").lower() == "open":
+            visible_matches = matches[:1]
+        else:
+            if job.assigned_worker_id and not assigned_matches:
+                assigned_worker = Worker.query.get(job.assigned_worker_id)
+
+                if assigned_worker:
+                    application = application_by_worker_id.get(assigned_worker.id)
+                    assigned_matches.append({
+                        "application_id": application.id if application else None,
+                        "worker_id": assigned_worker.id,
+                        "worker_name": assigned_worker.name,
+                        "profession": assigned_worker.profession,
+                        "skills": assigned_worker.skills,
+                        "rating": assigned_worker.rating,
+                        "experience": assigned_worker.experience,
+                        "score": calculate_match_score(assigned_worker, job),
+                        "application_status": application.status if application else "selected",
+                        "is_assigned": True
+                    })
+
+            visible_matches = assigned_matches
 
         result.append({
             "job_id": job.id,
@@ -917,8 +945,9 @@ def job_matches():
             "job_location": job.location,
             "budget": job.budget,
             "status": job.status,
+            "assigned_worker_id": job.assigned_worker_id,
             "applicant_count": len(applications),
-            "top_matches": matches[:5]
+            "top_matches": visible_matches
         })
 
     return jsonify(result), 200
@@ -960,8 +989,14 @@ def hire():
             return jsonify({"error": "Only verified workers can be hired"}), 400
 
         application = JobApplication.query.filter_by(job_id=job.id, worker_id=worker.id).first()
+
         if not application:
-            return jsonify({"error": "This worker has not applied for the job"}), 400
+            application = JobApplication(
+                worker_id=worker.id,
+                job_id=job.id,
+                status="selected"
+            )
+            db.session.add(application)
 
         job.status = "assigned"
         job.assigned_worker_id = worker_id

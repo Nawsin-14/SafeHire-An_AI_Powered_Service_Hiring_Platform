@@ -59,6 +59,17 @@
                 </div>
 
                 <div>
+                    <label class="block mb-2 text-sm text-white/80">Profession</label>
+                    <input
+                        type="text"
+                        id="profession"
+                        value="{{ worker.profession }}"
+                        class="w-full px-5 py-4 rounded-2xl bg-white/10 border border-white/20 text-white outline-none focus:border-pink-400"
+                        required
+                    />
+                </div>
+
+                <div>
                     <label class="block mb-2 text-sm text-white/80">Experience (Years)</label>
                     <input
                         type="number"
@@ -171,6 +182,7 @@
                 phone: document.getElementById("phone").value.trim(),
                 address: document.getElementById("address").value.trim(),
                 skills: document.getElementById("skills").value.trim(),
+                profession: document.getElementById("profession").value.trim(),
                 experience: document.getElementById("experience").value.trim()
             };
 

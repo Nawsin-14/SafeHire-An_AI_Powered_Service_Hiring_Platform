@@ -61,12 +61,31 @@ function renderRating(rating) {
 }
 
 
+function getWorkerMatchBadge(worker) {
+  if (worker.is_assigned || worker.application_status === "selected") {
+    return `<span class="px-2 py-1 rounded-full text-xs bg-pink-500/20 text-pink-200">Hired</span>`;
+  }
+
+  if (worker.application_status === "suggested") {
+    return `<span class="px-2 py-1 rounded-full text-xs bg-blue-500/20 text-blue-200">Best Match</span>`;
+  }
+
+  return `<span class="px-2 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-200">Applied</span>`;
+}
+
+
 function getEmployerViewCard(job, workers) {
   const workerHTML = workers.length
     ? workers.map((w) => `
         <div class="bg-white/10 p-4 rounded-xl border border-white/10">
           
-          <p class="font-semibold text-lg">${w.worker_name}</p>
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="font-semibold text-lg">${w.worker_name}</p>
+              <p class="text-xs text-pink-200">${w.profession || "Worker"}</p>
+            </div>
+            ${getWorkerMatchBadge(w)}
+          </div>
           <p class="text-sm text-gray-300">${w.skills}</p>
           <p class="text-sm text-white/70">Experience: ${w.experience ?? 0} years</p>
           <p class="text-yellow-300 font-semibold">${renderRating(w.rating)}</p>
@@ -92,14 +111,14 @@ function getEmployerViewCard(job, workers) {
               : `
                 <button disabled
                   class="mt-3 w-full bg-gray-500 py-2 rounded-lg text-sm font-semibold opacity-70">
-                  Assigned
+                  ${w.is_assigned || w.application_status === "selected" ? "Hired" : "Unavailable"}
                 </button>
               `
           }
 
         </div>
       `).join("")
-    : `<p class="text-gray-300">No verified applicants yet.</p>`;
+    : `<p class="text-gray-300">No strong verified worker matches yet.</p>`;
 
   return `
     <div class="bg-white/10 p-5 rounded-2xl border border-white/10">
