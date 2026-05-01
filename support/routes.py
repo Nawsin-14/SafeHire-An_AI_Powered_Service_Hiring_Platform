@@ -408,11 +408,11 @@ def add_worker():
         phone = data.get("phone", "").strip()
         address = data.get("address", "").strip()
         skills = data.get("skills", "").strip()
-        profession = data.get("profession")
+        profession = data.get("profession", "").strip()
         experience = data.get("experience", 0)
         
 
-        if not all([name, nid, phone, address, profession]):
+        if not all([name, nid, phone, address, profession, skills]):
             return jsonify({"error": "Missing required fields"}), 400
 
         if Worker.query.filter_by(nid=nid).first():
@@ -435,6 +435,7 @@ def add_worker():
             phone=phone,
             address=address,
             profession=profession,
+            skills=skills,
             risk_score=risk_score,
             verification_status="Pending",
             experience=experience,

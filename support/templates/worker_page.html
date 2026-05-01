@@ -114,10 +114,17 @@
               class="w-full h-12 px-4 rounded-2xl bg-white/10 border border-white/10 text-white" />
           </div>
 
-          <div class="md:col-span-2">
+          <div>
             <label class="block mb-2">Profession</label>
+            <input type="text" id="profession" required
+              placeholder="Electrician"
+              class="w-full h-12 px-4 rounded-2xl bg-white/10 border border-white/10 text-white" />
+          </div>
+
+          <div>
+            <label class="block mb-2">Skills</label>
             <input type="text" id="skills" required
-              placeholder="Electrician, Plumbing, Repair"
+              placeholder="Wiring, Fan repair, Switch repair"
               class="w-full h-12 px-4 rounded-2xl bg-white/10 border border-white/10 text-white" />
           </div>
 
@@ -139,12 +146,13 @@
     e.preventDefault();
 
     const payload = {
-      name: document.getElementById("name").value,
-      nid: document.getElementById("nid").value,
-      phone: document.getElementById("phone").value,
-      address: document.getElementById("address").value,
-      skills: document.getElementById("skills").value,
-      experience: document.getElementById("experience").value
+      name: document.getElementById("name").value.trim(),
+      nid: document.getElementById("nid").value.trim(),
+      phone: document.getElementById("phone").value.trim(),
+      address: document.getElementById("address").value.trim(),
+      profession: document.getElementById("profession").value.trim(),
+      skills: document.getElementById("skills").value.trim(),
+      experience: document.getElementById("experience").value.trim()
     };
 
     const msg = document.getElementById("formMessage");
