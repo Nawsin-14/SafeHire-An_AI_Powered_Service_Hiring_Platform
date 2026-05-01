@@ -261,10 +261,8 @@ def worker_jobs():
     if not worker:
         return jsonify([]), 200
 
-    # Get the worker's profession
-    worker_profession = worker.profession  # Assuming 'profession' is a field in Worker model
+    worker_profession = worker.profession 
 
-    # Fetch open jobs that match the worker's profession
     open_jobs = Job.query.filter_by(status="open").order_by(Job.id.desc()).all()
 
     applications = JobApplication.query.filter_by(worker_id=worker.id).all()
@@ -410,9 +408,11 @@ def add_worker():
         phone = data.get("phone", "").strip()
         address = data.get("address", "").strip()
         skills = data.get("skills", "").strip()
+        profession = data.get("profession")
         experience = data.get("experience", 0)
+        
 
-        if not all([name, nid, phone, address, skills]):
+        if not all([name, nid, phone, address, profession]):
             return jsonify({"error": "Missing required fields"}), 400
 
         if Worker.query.filter_by(nid=nid).first():
@@ -434,7 +434,7 @@ def add_worker():
             nid=nid,
             phone=phone,
             address=address,
-            skills=skills,
+            profession=profession,
             risk_score=risk_score,
             verification_status="Pending",
             experience=experience,
